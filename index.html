@@ -1,1878 +1,724 @@
 <!DOCTYPE html>
-
 <html>
-
 <head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0">
-
-<title>AM Opportunity Dashboard</title>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<style>
-
-:root {
-
-    --primary: #4f46e5;
-    --primary-dark: #3730a3;
-
-    --green: #16a34a;
-    --orange: #f59e0b;
-    --red: #dc2626;
-    --blue: #0284c7;
-
-    --bg: #f5f7fb;
-    --card: #ffffff;
-
-    --text: #172033;
-    --muted: #64748b;
-
-    --border: #e5e7eb;
-
-}
-
-
-* {
-
-    box-sizing: border-box;
-
-}
-
-
-html,
-body {
-
-    margin: 0;
-    padding: 0;
-
-    width: 100%;
-    max-width: 100%;
-
-    overflow-x: hidden;
-
-}
-
-
-body {
-
-    font-family:
-        Inter,
-        Arial,
-        Helvetica,
-        sans-serif;
-
-    background: var(--bg);
-
-    color: var(--text);
-
-}
-
-
-.dashboard {
-
-    width: 100%;
-    max-width: 1600px;
-
-    margin: auto;
-
-    padding:
-        clamp(14px, 2vw, 28px);
-
-}
-
-
-/* =====================================================
-HEADER
-===================================================== */
-
-.header {
-
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: center;
-
-    gap: 20px;
-
-    margin-bottom: 20px;
-
-}
-
-
-.title h1 {
-
-    margin: 0;
-
-    font-size:
-        clamp(22px, 2.2vw, 32px);
-
-}
-
-
-.title p {
-
-    margin: 6px 0 0;
-
-    color: var(--muted);
-
-    font-size: 14px;
-
-}
-
-
-.header-right {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 10px;
-
-}
-
-
-.refresh-btn {
-
-    border: 0;
-
-    background: var(--primary);
-
-    color: white;
-
-    padding: 10px 16px;
-
-    border-radius: 8px;
-
-    cursor: pointer;
-
-    font-weight: 600;
-
-}
-
-
-.refresh-btn:hover {
-
-    background: var(--primary-dark);
-
-}
-
-
-/* =====================================================
-FILTERS
-===================================================== */
-
-.filters {
-
-    background: white;
-
-    border:
-        1px solid var(--border);
-
-    border-radius: 12px;
-
-    padding: 16px;
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(5, minmax(0, 1fr));
-
-    gap: 12px;
-
-    margin-bottom: 18px;
-
-}
-
-
-.filter label {
-
-    display: block;
-
-    font-size: 11px;
-
-    color: var(--muted);
-
-    margin-bottom: 5px;
-
-}
-
-
-.filter select,
-.filter input {
-
-    width: 100%;
-
-    min-width: 0;
-
-    padding: 9px;
-
-    border:
-        1px solid #d7dce5;
-
-    border-radius: 7px;
-
-    background: white;
-
-}
-
-
-/* =====================================================
-KPI
-===================================================== */
-
-.kpis {
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(5, minmax(0, 1fr));
-
-    gap: 14px;
-
-    margin-bottom: 18px;
-
-}
-
-
-.kpi {
-
-    min-width: 0;
-
-    background: white;
-
-    border:
-        1px solid var(--border);
-
-    border-radius: 12px;
-
-    padding: 18px;
-
-}
-
-
-.kpi-label {
-
-    font-size: 12px;
-
-    color: var(--muted);
-
-}
-
-
-.kpi-value {
-
-    margin-top: 7px;
-
-    font-size:
-        clamp(21px, 2vw, 30px);
-
-    font-weight: 750;
-
-    white-space: nowrap;
-
-    overflow: hidden;
-
-    text-overflow: ellipsis;
-
-}
-
-
-.kpi-note {
-
-    margin-top: 5px;
-
-    color: var(--muted);
-
-    font-size: 11px;
-
-}
-
-
-/* =====================================================
-CHART GRID
-===================================================== */
-
-.chart-grid {
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(2, minmax(0, 1fr));
-
-    gap: 16px;
-
-    margin-bottom: 18px;
-
-}
-
-
-.chart-card {
-
-    min-width: 0;
-
-    background: white;
-
-    border:
-        1px solid var(--border);
-
-    border-radius: 12px;
-
-    padding: 18px;
-
-}
-
-
-.chart-title {
-
-    font-weight: 700;
-
-    margin-bottom: 14px;
-
-}
-
-
-.chart-wrapper {
-
-    position: relative;
-
-    width: 100%;
-
-    height: 300px;
-
-}
-
-
-.chart-wrapper canvas {
-
-    max-width: 100% !important;
-
-}
-
-
-/* =====================================================
-AM PERFORMANCE
-===================================================== */
-
-.section {
-
-    background: white;
-
-    border:
-        1px solid var(--border);
-
-    border-radius: 12px;
-
-    padding: 18px;
-
-    margin-bottom: 18px;
-
-}
-
-
-.section-title {
-
-    font-weight: 700;
-
-    margin-bottom: 14px;
-
-}
-
-
-.am-grid {
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(auto-fit, minmax(210px, 1fr));
-
-    gap: 12px;
-
-}
-
-
-.am-card {
-
-    border:
-        1px solid var(--border);
-
-    border-radius: 10px;
-
-    padding: 14px;
-
-}
-
-
-.am-name {
-
-    font-weight: 700;
-
-    margin-bottom: 10px;
-
-}
-
-
-.am-row {
-
-    display: flex;
-
-    justify-content: space-between;
-
-    gap: 10px;
-
-    margin-top: 6px;
-
-    font-size: 12px;
-
-}
-
-
-.am-row span:first-child {
-
-    color: var(--muted);
-
-}
-
-
-.am-row span:last-child {
-
-    font-weight: 600;
-
-}
-
-
-/* =====================================================
-TABLE
-===================================================== */
-
-.table-container {
-
-    width: 100%;
-
-    overflow-x: auto;
-
-    -webkit-overflow-scrolling: touch;
-
-}
-
-
-table {
-
-    width: 100%;
-
-    min-width: 1050px;
-
-    border-collapse: collapse;
-
-}
-
-
-th,
-td {
-
-    padding: 11px 10px;
-
-    text-align: left;
-
-    border-bottom:
-        1px solid #edf0f4;
-
-    font-size: 12px;
-
-    white-space: nowrap;
-
-}
-
-
-th {
-
-    background: #f8fafc;
-
-    color: #475569;
-
-    position: sticky;
-
-    top: 0;
-
-}
-
-
-.stage {
-
-    display: inline-block;
-
-    padding: 4px 8px;
-
-    border-radius: 20px;
-
-    font-size: 10px;
-
-    font-weight: 700;
-
-}
-
-
-.stage-prospecting {
-
-    background: #e0f2fe;
-    color: #0369a1;
-
-}
-
-
-.stage-qualification {
-
-    background: #fef3c7;
-    color: #92400e;
-
-}
-
-
-.stage-proposal {
-
-    background: #ede9fe;
-    color: #6d28d9;
-
-}
-
-
-.stage-negotiation {
-
-    background: #dcfce7;
-    color: #166534;
-
-}
-
-
-.stage-closed {
-
-    background: #dbeafe;
-    color: #1d4ed8;
-
-}
-
-
-.old {
-
-    color: var(--red);
-
-    font-weight: 700;
-
-}
-
-
-/* =====================================================
-LOADING
-===================================================== */
-
-.loading {
-
-    position: fixed;
-
-    inset: 0;
-
-    background:
-        rgba(255,255,255,.8);
-
-    display: none;
-
-    justify-content: center;
-
-    align-items: center;
-
-    z-index: 100;
-
-}
-
-
-.loading-box {
-
-    background: white;
-
-    padding: 25px 35px;
-
-    border-radius: 12px;
-
-    box-shadow:
-        0 10px 40px rgba(0,0,0,.15);
-
-    font-weight: 600;
-
-}
-
-
-/* =====================================================
-RESPONSIVE
-===================================================== */
-
-@media(max-width:1100px) {
-
-    .filters {
-
-        grid-template-columns:
-            repeat(3, minmax(0,1fr));
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AM Opportunity Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-dark: #3730a3;
+      --green: #16a34a;
+      --orange: #f59e0b;
+      --red: #dc2626;
+      --blue: #0284c7;
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #172033;
+      --muted: #64748b;
+      --border: #e5e7eb;
     }
 
-    .kpis {
-
-        grid-template-columns:
-            repeat(3, minmax(0,1fr));
-
+    * {
+      box-sizing: border-box;
     }
 
-}
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+    }
 
+    body {
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
 
-@media(max-width:800px) {
+    .dashboard {
+      width: 100%;
+      max-width: 1600px;
+      margin: auto;
+      padding: clamp(14px, 2vw, 28px);
+    }
 
     .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
 
-        align-items: flex-start;
+    .title h1 {
+      margin: 0;
+      font-size: clamp(22px, 2.2vw, 32px);
+    }
 
-        flex-direction: column;
+    .title p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
 
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .refresh-btn {
+      border: 0;
+      background: var(--primary);
+      color: white;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .refresh-btn:hover {
+      background: var(--primary-dark);
     }
 
     .filters {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
 
-        grid-template-columns:
-            repeat(2, minmax(0,1fr));
+    .filter label {
+      display: block;
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
 
+    .filter select,
+    .filter input {
+      width: 100%;
+      min-width: 0;
+      padding: 9px;
+      border: 1px solid #d7dce5;
+      border-radius: 7px;
+      background: white;
     }
 
     .kpis {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
 
-        grid-template-columns:
-            repeat(2, minmax(0,1fr));
+    .kpi {
+      min-width: 0;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+    }
 
+    .kpi-label {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .kpi-value {
+      margin-top: 7px;
+      font-size: clamp(21px, 2vw, 30px);
+      font-weight: 750;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .kpi-note {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 11px;
     }
 
     .chart-grid {
-
-        grid-template-columns: 1fr;
-
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 18px;
     }
 
-}
-
-
-@media(max-width:500px) {
-
-    .dashboard {
-
-        padding: 10px;
-
+    .chart-card {
+      min-width: 0;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
     }
 
-    .filters {
-
-        grid-template-columns: 1fr;
-
-    }
-
-    .kpis {
-
-        grid-template-columns: 1fr;
-
+    .chart-title {
+      font-weight: 700;
+      margin-bottom: 14px;
     }
 
     .chart-wrapper {
-
-        height: 250px;
-
+      position: relative;
+      width: 100%;
+      height: 300px;
     }
 
-}
+    .chart-wrapper canvas {
+      max-width: 100% !important;
+    }
 
-</style>
+    .section {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 18px;
+    }
 
+    .section-title {
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .am-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+    }
+
+    .am-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+    }
+
+    .am-name {
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .am-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 6px;
+      font-size: 12px;
+    }
+
+    .am-row span:first-child {
+      color: var(--muted);
+    }
+
+    .am-row span:last-child {
+      font-weight: 600;
+    }
+
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+      width: 100%;
+      min-width: 1050px;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 11px 10px;
+      text-align: left;
+      border-bottom: 1px solid #edf0f4;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    th {
+      background: #f8fafc;
+      color: #475569;
+      position: sticky;
+      top: 0;
+    }
+
+    .stage {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .stage-prospecting { background: #e0f2fe; color: #0369a1; }
+    .stage-qualification { background: #fef3c7; color: #92400e; }
+    .stage-proposal { background: #ede9fe; color: #6d28d9; }
+    .stage-negotiation { background: #dcfce7; color: #166534; }
+    .stage-closed { background: #dbeafe; color: #1d4ed8; }
+
+    .old {
+      color: var(--red);
+      font-weight: 700;
+    }
+
+    .loading {
+      position: fixed;
+      inset: 0;
+      background: rgba(255,255,255,.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .loading-box {
+      background: white;
+      padding: 25px 35px;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,.15);
+      font-weight: 600;
+    }
+
+    @media(max-width:1100px) {
+      .filters, .kpis {
+        grid-template-columns: repeat(3, minmax(0,1fr));
+      }
+    }
+
+    @media(max-width:800px) {
+      .header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+      .filters, .kpis {
+        grid-template-columns: repeat(2, minmax(0,1fr));
+      }
+      .chart-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media(max-width:500px) {
+      .dashboard {
+        padding: 10px;
+      }
+      .filters, .kpis {
+        grid-template-columns: 1fr;
+      }
+      .chart-wrapper {
+        height: 250px;
+      }
+    }
+  </style>
 </head>
-
-
 <body>
 
-
 <div class="loading" id="loading">
-
-    <div class="loading-box">
-
-        Loading opportunity data...
-
-    </div>
-
+  <div class="loading-box">
+    Loading opportunity data...
+  </div>
 </div>
-
 
 <div class="dashboard">
-
-
-<!-- HEADER -->
-
-<div class="header">
-
+  <div class="header">
     <div class="title">
-
-        <h1>AM Opportunity Dashboard</h1>
-
-        <p>
-            Opportunity pipeline, activity and aging analysis
-        </p>
-
+      <h1>AM Opportunity Dashboard</h1>
+      <p>Opportunity pipeline, activity and aging analysis</p>
     </div>
-
     <div class="header-right">
-
-        <button
-            class="refresh-btn"
-            onclick="loadData()">
-
-            ↻ Refresh
-
-        </button>
-
+      <button class="refresh-btn" onclick="loadData()">↻ Refresh</button>
     </div>
+  </div>
 
-</div>
-
-
-<!-- FILTERS -->
-
-<div class="filters">
+  <div class="filters">
+    <div class="filter">
+      <label>AM / OWNER</label>
+      <select id="amFilter" onchange="render()">
+        <option value="">All AMs</option>
+      </select>
+    </div>
 
     <div class="filter">
-
-        <label>AM / OWNER</label>
-
-        <select id="amFilter"
-                onchange="render()">
-
-            <option value="">All AMs</option>
-
-        </select>
-
+      <label>STAGE</label>
+      <select id="stageFilter" onchange="render()">
+        <option value="">All Stages</option>
+      </select>
     </div>
-
 
     <div class="filter">
-
-        <label>STAGE</label>
-
-        <select id="stageFilter"
-                onchange="render()">
-
-            <option value="">All Stages</option>
-
-        </select>
-
+      <label>DATE FROM</label>
+      <input type="date" id="dateFrom" onchange="render()">
     </div>
-
 
     <div class="filter">
-
-        <label>DATE FROM</label>
-
-        <input
-            type="date"
-            id="dateFrom"
-            onchange="render()">
-
+      <label>DATE TO</label>
+      <input type="date" id="dateTo" onchange="render()">
     </div>
-
 
     <div class="filter">
-
-        <label>DATE TO</label>
-
-        <input
-            type="date"
-            id="dateTo"
-            onchange="render()">
-
+      <label>SEARCH</label>
+      <input type="text" id="search" placeholder="Account or opportunity..." oninput="render()">
     </div>
+  </div>
 
-
-    <div class="filter">
-
-        <label>SEARCH</label>
-
-        <input
-            type="text"
-            id="search"
-            placeholder="Account or opportunity..."
-            oninput="render()">
-
-    </div>
-
-</div>
-
-
-<!-- KPIs -->
-
-<div class="kpis">
-
+  <div class="kpis">
     <div class="kpi">
-
-        <div class="kpi-label">
-            TOTAL OPPORTUNITIES
-        </div>
-
-        <div class="kpi-value"
-             id="totalOpp">
-            0
-        </div>
-
-        <div class="kpi-note">
-            Opportunities
-        </div>
-
+      <div class="kpi-label">TOTAL OPPORTUNITIES</div>
+      <div class="kpi-value" id="totalOpp">0</div>
+      <div class="kpi-note">Opportunities</div>
     </div>
-
-
     <div class="kpi">
-
-        <div class="kpi-label">
-            TOTAL PIPELINE
-        </div>
-
-        <div class="kpi-value"
-             id="pipeline">
-            ₹0
-        </div>
-
-        <div class="kpi-note">
-            Opportunity value
-        </div>
-
+      <div class="kpi-label">TOTAL PIPELINE</div>
+      <div class="kpi-value" id="pipeline">₹0</div>
+      <div class="kpi-note">Opportunity value</div>
     </div>
-
-
     <div class="kpi">
-
-        <div class="kpi-label">
-            AVERAGE DEAL
-        </div>
-
-        <div class="kpi-value"
-             id="avgDeal">
-            ₹0
-        </div>
-
-        <div class="kpi-note">
-            Average amount
-        </div>
-
+      <div class="kpi-label">AVERAGE DEAL</div>
+      <div class="kpi-value" id="avgDeal">₹0</div>
+      <div class="kpi-note">Average amount</div>
     </div>
-
-
     <div class="kpi">
-
-        <div class="kpi-label">
-            QUANTITY
-        </div>
-
-        <div class="kpi-value"
-             id="quantity">
-            0
-        </div>
-
-        <div class="kpi-note">
-            Total opportunity quantity
-        </div>
-
+      <div class="kpi-label">QUANTITY</div>
+      <div class="kpi-value" id="quantity">0</div>
+      <div class="kpi-note">Total opportunity quantity</div>
     </div>
-
-
     <div class="kpi">
-
-        <div class="kpi-label">
-            AVG AGE
-        </div>
-
-        <div class="kpi-value"
-             id="avgAge">
-            0
-        </div>
-
-        <div class="kpi-note">
-            Days
-        </div>
-
+      <div class="kpi-label">AVG AGE</div>
+      <div class="kpi-value" id="avgAge">0</div>
+      <div class="kpi-note">Days</div>
     </div>
+  </div>
 
-</div>
-
-
-<!-- CHARTS -->
-
-<div class="chart-grid">
-
-
+  <div class="chart-grid">
     <div class="chart-card">
-
-        <div class="chart-title">
-            Pipeline by Stage
-        </div>
-
-        <div class="chart-wrapper">
-
-            <canvas id="stageChart"></canvas>
-
-        </div>
-
+      <div class="chart-title">Pipeline by Stage</div>
+      <div class="chart-wrapper">
+        <canvas id="stageChart"></canvas>
+      </div>
     </div>
-
-
     <div class="chart-card">
-
-        <div class="chart-title">
-            Pipeline by AM
-        </div>
-
-        <div class="chart-wrapper">
-
-            <canvas id="amChart"></canvas>
-
-        </div>
-
+      <div class="chart-title">Pipeline by AM</div>
+      <div class="chart-wrapper">
+        <canvas id="amChart"></canvas>
+      </div>
     </div>
-
-
     <div class="chart-card">
-
-        <div class="chart-title">
-            Opportunities by Stage
-        </div>
-
-        <div class="chart-wrapper">
-
-            <canvas id="stageCountChart"></canvas>
-
-        </div>
-
+      <div class="chart-title">Opportunities by Stage</div>
+      <div class="chart-wrapper">
+        <canvas id="stageCountChart"></canvas>
+      </div>
     </div>
-
-
     <div class="chart-card">
-
-        <div class="chart-title">
-            Opportunity Aging
-        </div>
-
-        <div class="chart-wrapper">
-
-            <canvas id="agingChart"></canvas>
-
-        </div>
-
+      <div class="chart-title">Opportunity Aging</div>
+      <div class="chart-wrapper">
+        <canvas id="agingChart"></canvas>
+      </div>
     </div>
+  </div>
 
-</div>
+  <div class="section">
+    <div class="section-title">AM Performance</div>
+    <div class="am-grid" id="amGrid"></div>
+  </div>
 
-
-<!-- AM PERFORMANCE -->
-
-<div class="section">
-
+  <div class="section">
     <div class="section-title">
-        AM Performance
+      Opportunity Details
+      <span id="rowCount" style="color:#64748b; font-size:12px; margin-left:8px;"></span>
     </div>
-
-    <div class="am-grid"
-         id="amGrid">
-    </div>
-
-</div>
-
-
-<!-- OPPORTUNITY TABLE -->
-
-<div class="section">
-
-    <div class="section-title">
-
-        Opportunity Details
-
-        <span
-            id="rowCount"
-            style="
-                color:#64748b;
-                font-size:12px;
-                margin-left:8px;
-            ">
-
-        </span>
-
-    </div>
-
-
     <div class="table-container">
-
-        <table>
-
-            <thead>
-
-                <tr>
-
-                    <th>AM</th>
-
-                    <th>Stage</th>
-
-                    <th>Account</th>
-
-                    <th>Opportunity</th>
-
-                    <th>Amount</th>
-
-                    <th>Created</th>
-
-                    <th>Last Activity</th>
-
-                    <th>Age</th>
-
-                    <th>Qty</th>
-
-                    <th>Next Step</th>
-
-                    <th>Modified</th>
-
-                </tr>
-
-            </thead>
-
-            <tbody id="tableBody">
-
-            </tbody>
-
-        </table>
-
+      <table>
+        <thead>
+          <tr>
+            <th>AM</th>
+            <th>Stage</th>
+            <th>Account</th>
+            <th>Opportunity</th>
+            <th>Amount</th>
+            <th>Created</th>
+            <th>Last Activity</th>
+            <th>Age</th>
+            <th>Qty</th>
+            <th>Next Step</th>
+            <th>Modified</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
     </div>
-
+  </div>
 </div>
-
-
-</div>
-
 
 <script>
-
-
 let DATA = [];
-
 let charts = {};
 
-
-/*
-========================================================
-LOAD DATA
-========================================================
-*/
-
 function loadData() {
+  document.getElementById("loading").style.display = "flex";
 
-    document
-        .getElementById("loading")
-        .style.display = "flex";
-
-
-    google.script.run
-
-        .withSuccessHandler(result => {
-
-            DATA = result.rows || [];
-
-            setupFilters();
-
-            render();
-
-            document
-                .getElementById("loading")
-                .style.display = "none";
-
-        })
-
-        .withFailureHandler(error => {
-
-            document
-                .getElementById("loading")
-                .style.display = "none";
-
-            alert(
-                "Unable to load data:\n" +
-                error.message
-            );
-
-        })
-
-        .getDashboardData();
-
+  google.script.run
+    .withSuccessHandler(result => {
+      DATA = result.rows || [];
+      setupFilters();
+      render();
+      document.getElementById("loading").style.display = "none";
+    })
+    .withFailureHandler(error => {
+      document.getElementById("loading").style.display = "none";
+      alert("Unable to load data:\n" + error.message);
+    })
+    .getDashboardData();
 }
-
-
-/*
-========================================================
-FILTER SETUP
-========================================================
-*/
 
 function setupFilters() {
+  const currentAM = document.getElementById("amFilter").value;
+  const currentStage = document.getElementById("stageFilter").value;
 
-    const ams =
-        [...new Set(
-            DATA.map(x => x.am)
-        )]
-        .filter(Boolean)
-        .sort();
+  const ams = [...new Set(DATA.map(x => x.am))].filter(Boolean).sort();
+  const stages = [...new Set(DATA.map(x => x.stage))].filter(Boolean).sort();
 
+  const amSelect = document.getElementById("amFilter");
+  const stageSelect = document.getElementById("stageFilter");
 
-    const stages =
-        [...new Set(
-            DATA.map(x => x.stage)
-        )]
-        .filter(Boolean)
-        .sort();
+  amSelect.innerHTML = '<option value="">All AMs</option>';
+  stageSelect.innerHTML = '<option value="">All Stages</option>';
 
+  ams.forEach(am => {
+    const opt = document.createElement("option");
+    opt.value = am;
+    opt.textContent = am;
+    if (am === currentAM) opt.selected = true;
+    amSelect.appendChild(opt);
+  });
 
-    const amSelect =
-        document.getElementById("amFilter");
-
-    const stageSelect =
-        document.getElementById("stageFilter");
-
-
-    amSelect.innerHTML =
-        '<option value="">All AMs</option>';
-
-    stageSelect.innerHTML =
-        '<option value="">All Stages</option>';
-
-
-    ams.forEach(am => {
-
-        amSelect.innerHTML +=
-            `<option value="${escapeHtml(am)}">
-                ${escapeHtml(am)}
-            </option>`;
-
-    });
-
-
-    stages.forEach(stage => {
-
-        stageSelect.innerHTML +=
-            `<option value="${escapeHtml(stage)}">
-                ${escapeHtml(stage)}
-            </option>`;
-
-    });
-
+  stages.forEach(stage => {
+    const opt = document.createElement("option");
+    opt.value = stage;
+    opt.textContent = stage;
+    if (stage === currentStage) opt.selected = true;
+    stageSelect.appendChild(opt);
+  });
 }
-
-
-/*
-========================================================
-FILTER DATA
-========================================================
-*/
 
 function getFilteredData() {
+  const am = document.getElementById("amFilter").value;
+  const stage = document.getElementById("stageFilter").value;
+  const from = document.getElementById("dateFrom").value;
+  const to = document.getElementById("dateTo").value;
+  const search = document.getElementById("search").value.toLowerCase().trim();
 
-    const am =
-        document.getElementById("amFilter").value;
+  const fromTime = from ? new Date(from).getTime() : null;
+  const toTime = to ? new Date(to).getTime() : null;
 
-    const stage =
-        document.getElementById("stageFilter").value;
+  return DATA.filter(row => {
+    if (am && row.am !== am) return false;
+    if (stage && row.stage !== stage) return false;
 
-    const from =
-        document.getElementById("dateFrom").value;
+    if (row.created) {
+      const createdTime = new Date(row.created).getTime();
+      if (!isNaN(createdTime)) {
+        if (fromTime && createdTime < fromTime) return false;
+        if (toTime && createdTime > toTime) return false;
+      }
+    }
 
-    const to =
-        document.getElementById("dateTo").value;
+    if (search) {
+      const text = `${row.account || ""} ${row.opportunity || ""} ${row.am || ""}`.toLowerCase();
+      if (!text.includes(search)) return false;
+    }
 
-    const search =
-        document
-            .getElementById("search")
-            .value
-            .toLowerCase()
-            .trim();
-
-
-    return DATA.filter(row => {
-
-        if (am && row.am !== am)
-            return false;
-
-
-        if (stage && row.stage !== stage)
-            return false;
-
-
-        if (from && row.created < from)
-            return false;
-
-
-        if (to && row.created > to)
-            return false;
-
-
-        if (search) {
-
-            const text = (
-
-                row.account +
-                " " +
-                row.opportunity +
-                " " +
-                row.am
-
-            ).toLowerCase();
-
-
-            if (!text.includes(search))
-                return false;
-
-        }
-
-
-        return true;
-
-    });
-
+    return true;
+  });
 }
-
-
-/*
-========================================================
-RENDER
-========================================================
-*/
 
 function render() {
-
-    const rows = getFilteredData();
-
-    updateKPIs(rows);
-
-    updateCharts(rows);
-
-    updateAMPerformance(rows);
-
-    updateTable(rows);
-
+  const rows = getFilteredData();
+  updateKPIs(rows);
+  updateCharts(rows);
+  updateAMPerformance(rows);
+  updateTable(rows);
 }
-
-
-/*
-========================================================
-KPIs
-========================================================
-*/
 
 function updateKPIs(rows) {
+  const count = rows.length;
+  const pipeline = rows.reduce((sum, row) => sum + Number(row.amount || 0), 0);
+  const quantity = rows.reduce((sum, row) => sum + Number(row.quantity || 0), 0);
+  const age = count ? rows.reduce((sum, row) => sum + Number(row.age || 0), 0) / count : 0;
 
-    const count = rows.length;
-
-
-    const pipeline =
-        rows.reduce(
-            (sum, row) =>
-                sum + Number(row.amount || 0),
-            0
-        );
-
-
-    const quantity =
-        rows.reduce(
-            (sum, row) =>
-                sum + Number(row.quantity || 0),
-            0
-        );
-
-
-    const age =
-        count
-        ?
-        rows.reduce(
-            (sum, row) =>
-                sum + Number(row.age || 0),
-            0
-        ) / count
-        :
-        0;
-
-
-    document.getElementById("totalOpp")
-        .textContent =
-        count.toLocaleString();
-
-
-    document.getElementById("pipeline")
-        .textContent =
-        money(pipeline);
-
-
-    document.getElementById("avgDeal")
-        .textContent =
-        money(
-            count
-                ? pipeline / count
-                : 0
-        );
-
-
-    document.getElementById("quantity")
-        .textContent =
-        quantity.toLocaleString();
-
-
-    document.getElementById("avgAge")
-        .textContent =
-        Math.round(age) + " days";
-
+  document.getElementById("totalOpp").textContent = count.toLocaleString();
+  document.getElementById("pipeline").textContent = money(pipeline);
+  document.getElementById("avgDeal").textContent = money(count ? pipeline / count : 0);
+  document.getElementById("quantity").textContent = quantity.toLocaleString();
+  document.getElementById("avgAge").textContent = Math.round(age) + " days";
 }
-
-
-/*
-========================================================
-CHARTS
-========================================================
-*/
 
 function updateCharts(rows) {
+  const stageAmount = {};
+  const amAmount = {};
+  const stageCount = {};
 
+  rows.forEach(row => {
+    const stage = row.stage || "Unknown";
+    const am = row.am || "Unknown";
 
-    const stageAmount = {};
+    stageAmount[stage] = (stageAmount[stage] || 0) + Number(row.amount || 0);
+    stageCount[stage] = (stageCount[stage] || 0) + 1;
+    amAmount[am] = (amAmount[am] || 0) + Number(row.amount || 0);
+  });
 
-    const amAmount = {};
+  const aging = { "0–30": 0, "31–60": 0, "61–90": 0, "91–180": 0, "181+": 0 };
 
-    const stageCount = {};
+  rows.forEach(row => {
+    const age = Number(row.age || 0);
+    if (age <= 30) aging["0–30"]++;
+    else if (age <= 60) aging["31–60"]++;
+    else if (age <= 90) aging["61–90"]++;
+    else if (age <= 180) aging["91–180"]++;
+    else aging["181+"]++;
+  });
 
+  createChart("stageChart", "bar", Object.keys(stageAmount), Object.values(stageAmount), "#4f46e5");
+  createChart("amChart", "bar", Object.keys(amAmount), Object.values(amAmount), "#0891b2");
 
-    rows.forEach(row => {
+  const stageKeys = Object.keys(stageCount);
+  const palette = ["#4f46e5", "#0891b2", "#f59e0b", "#16a34a", "#dc2626", "#8b5cf6", "#ec4899", "#14b8a6"];
+  const dynamicColors = stageKeys.map((_, i) => palette[i % palette.length]);
 
-        const stage =
-            row.stage || "Unknown";
-
-        const am =
-            row.am || "Unknown";
-
-
-        stageAmount[stage] =
-            (stageAmount[stage] || 0) +
-            Number(row.amount || 0);
-
-
-        stageCount[stage] =
-            (stageCount[stage] || 0) + 1;
-
-
-        amAmount[am] =
-            (amAmount[am] || 0) +
-            Number(row.amount || 0);
-
-    });
-
-
-    const aging = {
-
-        "0–30": 0,
-        "31–60": 0,
-        "61–90": 0,
-        "91–180": 0,
-        "181+": 0
-
-    };
-
-
-    rows.forEach(row => {
-
-        const age =
-            Number(row.age || 0);
-
-
-        if (age <= 30)
-            aging["0–30"]++;
-
-        else if (age <= 60)
-            aging["31–60"]++;
-
-        else if (age <= 90)
-            aging["61–90"]++;
-
-        else if (age <= 180)
-            aging["91–180"]++;
-
-        else
-            aging["181+"]++;
-
-    });
-
-
-    createChart(
-        "stageChart",
-        "bar",
-        Object.keys(stageAmount),
-        Object.values(stageAmount),
-        "#4f46e5"
-    );
-
-
-    createChart(
-        "amChart",
-        "bar",
-        Object.keys(amAmount),
-        Object.values(amAmount),
-        "#0891b2"
-    );
-
-
-    createChart(
-        "stageCountChart",
-        "doughnut",
-        Object.keys(stageCount),
-        Object.values(stageCount),
-        [
-            "#4f46e5",
-            "#0891b2",
-            "#f59e0b",
-            "#16a34a",
-            "#dc2626",
-            "#8b5cf6"
-        ]
-    );
-
-
-    createChart(
-        "agingChart",
-        "bar",
-        Object.keys(aging),
-        Object.values(aging),
-        [
-            "#22c55e",
-            "#84cc16",
-            "#facc15",
-            "#f97316",
-            "#ef4444"
-        ]
-    );
-
+  createChart("stageCountChart", "doughnut", stageKeys, Object.values(stageCount), dynamicColors);
+  createChart("agingChart", "bar", Object.keys(aging), Object.values(aging), [
+    "#22c55e", "#84cc16", "#facc15", "#f97316", "#ef4444"
+  ]);
 }
 
+function createChart(id, type, labels, data, colors) {
+  if (charts[id]) {
+    charts[id].destroy();
+  }
 
-/*
-========================================================
-CREATE CHART
-========================================================
-*/
-
-function createChart(
-    id,
-    type,
-    labels,
-    data,
-    colors
-) {
-
-    if (charts[id]) {
-
-        charts[id].destroy();
-
+  const ctx = document.getElementById(id).getContext("2d");
+  charts[id] = new Chart(ctx, {
+    type: type,
+    data: {
+      labels: labels,
+      datasets: [{
+        data: data,
+        backgroundColor: colors,
+        borderRadius: type === "bar" ? 5 : 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: type === "doughnut" }
+      },
+      scales: type === "doughnut" ? {} : {
+        y: { beginAtZero: true }
+      }
     }
-
-
-    const ctx =
-        document
-            .getElementById(id)
-            .getContext("2d");
-
-
-    charts[id] =
-        new Chart(ctx, {
-
-            type: type,
-
-            data: {
-
-                labels: labels,
-
-                datasets: [{
-
-                    data: data,
-
-                    backgroundColor: colors,
-
-                    borderRadius:
-                        type === "bar"
-                            ? 5
-                            : 0
-
-                }]
-
-            },
-
-            options: {
-
-                responsive: true,
-
-                maintainAspectRatio: false,
-
-                plugins: {
-
-                    legend: {
-
-                        display:
-                            type === "doughnut"
-
-                    }
-
-                },
-
-                scales:
-                    type === "doughnut"
-                        ? {}
-                        : {
-
-                            y: {
-
-                                beginAtZero: true
-
-                            }
-
-                        }
-
-            }
-
-        });
-
+  });
 }
-
-
-/*
-========================================================
-AM PERFORMANCE
-========================================================
-*/
 
 function updateAMPerformance(rows) {
+  const map = {};
 
-    const map = {};
+  rows.forEach(row => {
+    const am = row.am || "Unknown";
+    if (!map[am]) {
+      map[am] = { opportunities: 0, amount: 0, quantity: 0, age: 0 };
+    }
+    map[am].opportunities++;
+    map[am].amount += Number(row.amount || 0);
+    map[am].quantity += Number(row.quantity || 0);
+    map[am].age += Number(row.age || 0);
+  });
 
+  const container = document.getElementById("amGrid");
+  container.innerHTML = "";
 
-    rows.forEach(row => {
-
-        const am =
-            row.am || "Unknown";
-
-
-        if (!map[am]) {
-
-            map[am] = {
-
-                opportunities: 0,
-                amount: 0,
-                quantity: 0,
-                age: 0
-
-            };
-
-        }
-
-
-        map[am].opportunities++;
-
-        map[am].amount +=
-            Number(row.amount || 0);
-
-        map[am].quantity +=
-            Number(row.quantity || 0);
-
-        map[am].age +=
-            Number(row.age || 0);
-
+  Object.entries(map)
+    .sort((a, b) => b[1].amount - a[1].amount)
+    .forEach(([am, stats]) => {
+      const averageAge = stats.opportunities ? Math.round(stats.age / stats.opportunities) : 0;
+      const card = document.createElement("div");
+      card.className = "am-card";
+      card.innerHTML = `
+        <div class="am-name">${escapeHtml(am)}</div>
+        <div class="am-row"><span>Pipeline</span><span>${money(stats.amount)}</span></div>
+        <div class="am-row"><span>Opportunities</span><span>${stats.opportunities}</span></div>
+        <div class="am-row"><span>Quantity</span><span>${stats.quantity}</span></div>
+        <div class="am-row"><span>Avg Age</span><span>${averageAge} days</span></div>
+      `;
+      container.appendChild(card);
     });
-
-
-    const container =
-        document.getElementById("amGrid");
-
-
-    container.innerHTML = "";
-
-
-    Object.entries(map)
-
-        .sort(
-            (a, b) =>
-                b[1].amount - a[1].amount
-        )
-
-        .forEach(([am, stats]) => {
-
-            const averageAge =
-                stats.opportunities
-                    ?
-                    Math.round(
-                        stats.age /
-                        stats.opportunities
-                    )
-                    :
-                    0;
-
-
-            container.innerHTML += `
-
-                <div class="am-card">
-
-                    <div class="am-name">
-                        ${escapeHtml(am)}
-                    </div>
-
-                    <div class="am-row">
-                        <span>Pipeline</span>
-                        <span>
-                            ${money(stats.amount)}
-                        </span>
-                    </div>
-
-                    <div class="am-row">
-                        <span>Opportunities</span>
-                        <span>
-                            ${stats.opportunities}
-                        </span>
-                    </div>
-
-                    <div class="am-row">
-                        <span>Quantity</span>
-                        <span>
-                            ${stats.quantity}
-                        </span>
-                    </div>
-
-                    <div class="am-row">
-                        <span>Avg Age</span>
-                        <span>
-                            ${averageAge} days
-                        </span>
-                    </div>
-
-                </div>
-
-            `;
-
-        });
-
 }
-
-
-/*
-========================================================
-TABLE
-========================================================
-*/
 
 function updateTable(rows) {
+  const body = document.getElementById("tableBody");
+  body.innerHTML = "";
+  document.getElementById("rowCount").textContent = `${rows.length.toLocaleString()} records`;
 
-    const body =
-        document.getElementById("tableBody");
+  const sorted = [...rows].sort((a, b) => Number(b.amount || 0) - Number(a.amount || 0));
 
+  sorted.forEach(row => {
+    const tr = document.createElement("tr");
+    const stageClass = getStageClass(row.stage);
+    const ageClass = Number(row.age) > 180 ? "old" : "";
 
-    body.innerHTML = "";
-
-
-    document.getElementById("rowCount")
-        .textContent =
-        `${rows.length.toLocaleString()} records`;
-
-
-    /*
-    Show newest/most relevant first
-    */
-
-    const sorted =
-        [...rows].sort(
-            (a, b) =>
-                Number(b.amount || 0) -
-                Number(a.amount || 0)
-        );
-
-
-    sorted.forEach(row => {
-
-        const tr =
-            document.createElement("tr");
-
-
-        const stageClass =
-            getStageClass(row.stage);
-
-
-        const ageClass =
-            Number(row.age) > 180
-                ? "old"
-                : "";
-
-
-        tr.innerHTML = `
-
-            <td>
-                ${escapeHtml(row.am)}
-            </td>
-
-            <td>
-
-                <span
-                    class="stage ${stageClass}">
-
-                    ${escapeHtml(row.stage)}
-
-                </span>
-
-            </td>
-
-            <td>
-                ${escapeHtml(row.account)}
-            </td>
-
-            <td>
-                <strong>
-                    ${escapeHtml(row.opportunity)}
-                </strong>
-            </td>
-
-            <td>
-                ${money(row.amount)}
-            </td>
-
-            <td>
-                ${escapeHtml(row.created)}
-            </td>
-
-            <td>
-                ${escapeHtml(row.activity)}
-            </td>
-
-            <td class="${ageClass}">
-                ${row.age || 0} days
-            </td>
-
-            <td>
-                ${Number(row.quantity || 0).toLocaleString()}
-            </td>
-
-            <td>
-                ${escapeHtml(row.nextStep)}
-            </td>
-
-            <td>
-                ${escapeHtml(row.modified)}
-            </td>
-
-        `;
-
-
-        body.appendChild(tr);
-
-    });
-
+    tr.innerHTML = `
+      <td>${escapeHtml(row.am)}</td>
+      <td><span class="stage ${stageClass}">${escapeHtml(row.stage)}</span></td>
+      <td>${escapeHtml(row.account)}</td>
+      <td><strong>${escapeHtml(row.opportunity)}</strong></td>
+      <td>${money(row.amount)}</td>
+      <td>${escapeHtml(row.created)}</td>
+      <td>${escapeHtml(row.activity)}</td>
+      <td class="${ageClass}">${row.age || 0} days</td>
+      <td>${Number(row.quantity || 0).toLocaleString()}</td>
+      <td>${escapeHtml(row.nextStep)}</td>
+      <td>${escapeHtml(row.modified)}</td>
+    `;
+    body.appendChild(tr);
+  });
 }
-
-
-/*
-========================================================
-HELPERS
-========================================================
-*/
 
 function money(value) {
-
-    return new Intl.NumberFormat(
-        "en-IN",
-        {
-
-            style: "currency",
-
-            currency: "INR",
-
-            maximumFractionDigits: 0
-
-        }
-    ).format(value || 0);
-
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0
+  }).format(value || 0);
 }
-
 
 function getStageClass(stage) {
-
-    const s =
-        String(stage || "")
-            .toLowerCase();
-
-
-    if (s.includes("prospect"))
-        return "stage-prospecting";
-
-
-    if (s.includes("qualif"))
-        return "stage-qualification";
-
-
-    if (s.includes("proposal"))
-        return "stage-proposal";
-
-
-    if (s.includes("negotiat"))
-        return "stage-negotiation";
-
-
-    if (s.includes("closed"))
-        return "stage-closed";
-
-
-    return "";
-
+  const s = String(stage || "").toLowerCase();
+  if (s.includes("prospect")) return "stage-prospecting";
+  if (s.includes("qualif")) return "stage-qualification";
+  if (s.includes("proposal")) return "stage-proposal";
+  if (s.includes("negotiat")) return "stage-negotiation";
+  if (s.includes("closed")) return "stage-closed";
+  return "";
 }
-
 
 function escapeHtml(value) {
-
-    if (
-        value === null ||
-        value === undefined
-    ) {
-        return "";
-
-    }
-
-
-    return String(value)
-
-        .replace(/&/g, "&amp;")
-
-        .replace(/</g, "&lt;")
-
-        .replace(/>/g, "&gt;")
-
-        .replace(/"/g, "&quot;")
-
-        .replace(/'/g, "&#039;");
-
+  if (value === null || value === undefined) return "";
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
-
-/*
-========================================================
-INITIAL LOAD
-========================================================
-*/
-
 window.onload = loadData;
-
 </script>
-
 </body>
-
 </html>
