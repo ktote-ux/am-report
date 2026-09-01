@@ -3,40 +3,49 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Accounts & Pipeline Dashboard</title>
+  <title>Sales Pipeline & Accounts Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
-<body class="min-h-screen bg-gray-50">
+<body class="min-h-screen bg-slate-50 text-slate-800">
 <div class="mx-auto max-w-7xl space-y-5 p-6">
 
   <!-- ══════════ HEADER ══════════ -->
   <div class="flex flex-wrap items-center justify-between gap-4">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900">📊 Accounts & Pipeline Dashboard</h1>
-      <p id="status" class="text-sm text-gray-500">Loading pipeline data…</p>
+      <h1 class="text-2xl font-bold tracking-tight text-slate-900">📊 Sales Pipeline & Accounts Dashboard</h1>
+      <p id="status" class="text-xs font-medium text-slate-500">Initializing…</p>
     </div>
-    <div class="flex flex-wrap gap-2">
-      <button id="tab-leadership" onclick="setTab('leadership')" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm">Leadership View</button>
-      <button id="tab-manager" onclick="setTab('manager')" class="rounded-lg border bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 shadow-sm">Manager View</button>
-      <button onclick="exportCSV()" class="rounded-lg border bg-white px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 shadow-sm">⬇ Export CSV</button>
-      <button onclick="loadData()" class="rounded-lg border bg-white px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 shadow-sm">↻ Refresh</button>
+    <div class="flex flex-wrap items-center gap-2">
+      <button id="tab-leadership" onclick="setTab('leadership')" class="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-blue-700">Leadership View</button>
+      <button id="tab-manager" onclick="setTab('manager')" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">Manager View</button>
+      <button onclick="exportCSV()" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50">⬇ Export CSV</button>
+      <button onclick="toggleDataModal()" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50">⚙️ Data Source</button>
+      <button onclick="loadData()" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50">↻ Sync</button>
     </div>
   </div>
 
-  <!-- ══════════ FILTERS ══════════ -->
-  <div class="flex flex-wrap items-center gap-2 rounded-xl border bg-white p-3 shadow-sm">
-    <span class="text-xs font-semibold uppercase text-gray-400">Date Range:</span>
-    <button onclick="setRange('all')"  class="rounded-md border px-2.5 py-1 text-xs hover:bg-gray-50">All Time</button>
-    <button onclick="setRange(30)"     class="rounded-md border px-2.5 py-1 text-xs hover:bg-gray-50">30 Days</button>
-    <button onclick="setRange(90)"     class="rounded-md border px-2.5 py-1 text-xs hover:bg-gray-50">90 Days</button>
-    <button onclick="setRange('ytd')"  class="rounded-md border px-2.5 py-1 text-xs hover:bg-gray-50">YTD</button>
-    <input type="date" id="dateFrom" onchange="render()" class="rounded-md border px-2 py-1 text-xs" />
-    <span class="text-xs text-gray-400">→</span>
-    <input type="date" id="dateTo" onchange="render()" class="rounded-md border px-2 py-1 text-xs" />
-    <select id="statusFilter" onchange="render()" class="rounded-md border px-2 py-1 text-xs"><option value="">All Stages</option></select>
-    <select id="managerFilter" onchange="render()" class="hidden rounded-md border px-2 py-1 text-xs"><option value="">All Owners</option></select>
-    <input id="search" oninput="onSearch()" placeholder="🔍 Search pipeline…" class="ml-auto rounded-md border px-3 py-1.5 text-xs w-48" />
+  <!-- ══════════ FILTERS BAR ══════════ -->
+  <div class="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+    <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Filters:</span>
+    <button onclick="setRange('all')"  class="rounded-md border border-slate-200 px-2.5 py-1 text-xs font-medium hover:bg-slate-50">All Time</button>
+    <button onclick="setRange(30)"     class="rounded-md border border-slate-200 px-2.5 py-1 text-xs font-medium hover:bg-slate-50">30 Days</button>
+    <button onclick="setRange(90)"     class="rounded-md border border-slate-200 px-2.5 py-1 text-xs font-medium hover:bg-slate-50">90 Days</button>
+    <button onclick="setRange('ytd')"  class="rounded-md border border-slate-200 px-2.5 py-1 text-xs font-medium hover:bg-slate-50">YTD</button>
+    
+    <input type="date" id="dateFrom" onchange="render()" class="rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-700" />
+    <span class="text-xs text-slate-400">→</span>
+    <input type="date" id="dateTo" onchange="render()" class="rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-700" />
+    
+    <select id="statusFilter" onchange="render()" class="rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-700 font-medium">
+      <option value="">All Stages</option>
+    </select>
+    
+    <select id="managerFilter" onchange="render()" class="hidden rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-700 font-medium">
+      <option value="">All Owners</option>
+    </select>
+    
+    <input id="search" oninput="onSearch()" placeholder="🔍 Search table…" class="ml-auto rounded-md border border-slate-300 px-3 py-1 text-xs text-slate-700 w-52" />
   </div>
 
   <!-- ══════════ KPI CARDS ══════════ -->
@@ -44,42 +53,59 @@
 
   <!-- ══════════ CHARTS ROW 1 ══════════ -->
   <div class="grid gap-5 lg:grid-cols-2">
-    <div class="rounded-xl border bg-white p-4 shadow-sm">
-      <h2 class="mb-3 font-semibold text-gray-800">Pipeline Revenue Over Time</h2>
+    <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <h2 class="mb-3 text-sm font-bold text-slate-800">📈 Pipeline Revenue Over Time</h2>
       <div class="relative h-64"><canvas id="lineChart"></canvas></div>
     </div>
-    <div id="barCard" class="rounded-xl border bg-white p-4 shadow-sm">
-      <h2 class="mb-3 font-semibold text-gray-800">Revenue by Opportunity Owner</h2>
+    <div id="barCard" class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <h2 class="mb-3 text-sm font-bold text-slate-800">👤 Pipeline by Opportunity Owner</h2>
       <div class="relative h-64"><canvas id="barChart"></canvas></div>
     </div>
   </div>
 
   <!-- ══════════ CHARTS ROW 2 ══════════ -->
   <div class="grid gap-5 lg:grid-cols-2">
-    <div class="rounded-xl border bg-white p-4 shadow-sm">
-      <h2 class="mb-3 font-semibold text-gray-800">Opportunities by Stage</h2>
+    <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <h2 class="mb-3 text-sm font-bold text-slate-800">📊 Deals by Opportunity Stage</h2>
       <div class="relative h-64"><canvas id="donutChart"></canvas></div>
     </div>
-    <div class="rounded-xl border bg-white p-4 shadow-sm">
-      <h2 class="mb-3 font-semibold text-gray-800">Top 10 Accounts by Revenue</h2>
+    <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <h2 class="mb-3 text-sm font-bold text-slate-800">🏢 Top 10 Accounts by Pipeline Value</h2>
       <div class="relative h-64"><canvas id="topChart"></canvas></div>
     </div>
   </div>
 
   <!-- ══════════ DATA TABLE ══════════ -->
-  <div class="overflow-x-auto rounded-xl border bg-white shadow-sm">
-    <table class="w-full text-sm">
-      <thead id="tableHead" class="bg-gray-50 text-left text-gray-600"></thead>
-      <tbody id="tableBody" class="divide-y divide-gray-100"></tbody>
-    </table>
-    <p id="tableFoot" class="border-t px-4 py-2 text-xs text-gray-400"></p>
+  <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs">
+        <thead id="tableHead" class="bg-slate-100 text-slate-700 font-semibold uppercase tracking-wider"></thead>
+        <tbody id="tableBody" class="divide-y divide-slate-100"></tbody>
+      </table>
+    </div>
+    <p id="tableFoot" class="border-t border-slate-100 px-4 py-2 text-xs text-slate-400"></p>
   </div>
+</div>
 
+<!-- ══════════ DATA MODAL ══════════ -->
+<div id="dataModal" class="fixed inset-0 z-50 flex hidden items-center justify-center bg-slate-900/50 p-4">
+  <div class="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl space-y-4">
+    <div class="flex items-center justify-between">
+      <h3 class="text-base font-bold text-slate-800">⚙️ Data Source Settings</h3>
+      <button onclick="toggleDataModal()" class="text-slate-400 hover:text-slate-600">✕</button>
+    </div>
+    <p class="text-xs text-slate-500">Sync with a live Google Sheet URL or paste CSV rows below:</p>
+    <input id="sheetUrlInput" type="text" class="w-full rounded-lg border border-slate-300 p-2 text-xs" placeholder="https://docs.google.com/spreadsheets/d/..." />
+    <textarea id="csvPasteInput" rows="6" class="w-full rounded-lg border border-slate-300 p-2 font-mono text-xs" placeholder="Paste CSV data here..."></textarea>
+    <div class="flex justify-end gap-2">
+      <button onclick="saveAndReloadSource()" class="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700">Apply & Reload</button>
+    </div>
+  </div>
 </div>
 
 <script>
 /* ═══════════════════════════════════════════════════════════════
-   PRE-POPULATED PIPELINE CONFIGURATION
+   PRE-EMBEDDED PIPELINE DATASET & CONFIGURATION
    ═══════════════════════════════════════════════════════════════ */
 const CONFIG = {
   SHEET_URL: "https://docs.google.com/spreadsheets/d/1I696sG9CTFIfBgSeDo0gsxfgFjg_eN2skPSNQgGXqvo/edit",
@@ -93,11 +119,71 @@ const CONFIG = {
   REFRESH_MINUTES: 5,
 };
 
+// Embedded dataset from Consolidated Pipeline Report
+const EMBEDDED_DATA = [
+  ["Opportunity Owner", "Stage", "Account Name", "Opportunity Name", "Amount", "Created Date", "Last Activity", "Next Step", "Last Modified Date", "Last Modified By", "No Activity Days", "Age", "Opportunity Quantity", "In Stale Pipeline"],
+  ["Aakanksha Kumari", "01 - Refine", "Pied Parker, Inc.", "SMB AM-piedparker.com-12 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "15321.60", "2026-08-12", "", "Sent an email on August 21; follow-up scheduled for August 29.", "2026-08-27", "Aakanksha Kumari", "", "20", "76", "Yes"],
+  ["Aakanksha Kumari", "01 - Refine", "POWER AIR SYSTEM COMPANY LIMITED", "SMB AM-powerairsystem.co.th-12 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "4536.00", "2026-08-12", "", "Email sent on 8/18, follow-up on 8/21.", "2026-08-20", "Aakanksha Kumari", "", "20", "45", "Yes"],
+  ["Aakanksha Kumari", "01 - Refine", "FX Bridge", "SMB AM-fxbridge.co - * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "5376.00", "2026-08-12", "", "Email sent on 8/21, follow-up on 8/29.", "2026-08-27", "Aakanksha Kumari", "", "20", "32", "Yes"],
+  ["Aakanksha Kumari", "01 - Refine", "VIP Dinero", "SMB AM-vipdinero.com-36 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "302.40", "2026-08-12", "", "Sent an email on 8/21; follow-up scheduled for 8/29.", "2026-08-27", "Aakanksha Kumari", "", "20", "36", "Yes"],
+  ["Aakanksha Kumari", "01 - Refine", "PREMIER DRIVING SCHOOL, INC.", "SMB AM-premierdriversed.com -48 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "403.20", "2026-08-12", "", "Sent an email on August 21; follow-up scheduled for August 29.", "2026-08-27", "Aakanksha Kumari", "", "20", "48", "Yes"],
+  ["Aakanksha Kumari", "01 - Refine", "Tapis Corporation", "SMB AM-tapiscorp.com-58 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "29232.00", "2026-08-12", "", "Email sent on 8/21, follow-up on 8/29.", "2026-08-27", "Aakanksha Kumari", "", "20", "58", "Yes"],
+  ["Aakanksha Kumari", "01 - Refine", "Floret", "SMB AM-tryfloret.com -31* New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "6249.60", "", "", "Sent an email on August 21; follow-up scheduled for August 29.", "", "API: Sales Systems Integration", "", "20", "31", "Yes"],
+  ["Aakanksha Kumari", "01 - Refine", "Ivyland Counseling Center Inc.", "SMB AM-ivylandcounselingcenter.com-57 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "15048.00", "", "", "Sent an email on August 21; follow-up scheduled for August 29.", "", "Aakanksha Kumari", "", "20", "57", "Yes"],
+  ["Aakanksha Kumari", "01 - Refine", "Valley Case Management & Consulting Services LLC", "SMB AM-valleycasemanagement.com -65 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "17160.00", "", "", "Sent an email on August 21; follow-up scheduled for August 29", "", "Aakanksha Kumari", "", "20", "65", "Yes"],
+  ["Aakanksha Kumari", "01 - Refine", "Kimmel Studio Architects", "SMB AM-kimmelstudio.com -65 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "23400.00", "", "", "send meeting link for 8/21,follow up scheduled for 8/29", "", "Aakanksha Kumari", "", "20", "65", "Yes"],
+  ["Aakanksha Kumari", "01 - Refine", "Raccoon Logic Studios Inc.", "SMB AM-raccoonlogic.com -27 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "13978.80", "", "", "send a quotation to the customer,they have yet not decided anything", "", "Aakanksha Kumari", "11", "19", "33", "Yes"],
+  ["Aakanksha Kumari", "03 - Proposal/Negotiation", "Monkhouse Law", "SMB AM-monkhouselaw.com -52 * - Google workspace Enterprise plus renewal", "26208.00", "", "", "Had a meeting with the client today 8/14 next follow up is next week 8/18", "", "Aakanksha Kumari", "", "19", "52", "Yes"],
+  ["Abhay Mamgain", "01 - Refine", "Starchild Interventions", "SMB AM - starchildinterventions.com - 15 * New - GWS Gemini Enterprise Business #GE #FY26_AWT_Renewal", "3024.00", "", "", "25/8 reminder sent to sign the contract.", "", "Abhay Mamgain", "5", "12", "12", "Yes"],
+  ["Abhay Mamgain", "01 - Refine", "co2cert.com", "SMB AM - .co2cert.com - 5 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "840.00", "", "", "21/8 follow up done, waiting on customer, will close if they still don't reply", "", "API: Sales Systems Integration", "7", "19", "5", "Yes"],
+  ["Abhay Mamgain", "01 - Refine", "RevenueFit Group", "SMB AM - revenuefitgroup.com - 10 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "2520.00", "", "", "19/8 reach out, 26/8 follow up done", "", "Abhay Mamgain", "4", "15", "10", "Yes"],
+  ["Abhay Mamgain", "01 - Refine", "Hashtag JukeLife", "SMB AM - hashtagjukelife.com - 10 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "2520.00", "", "", "26/8 follow up done, waiting for reply", "", "Abhay Mamgain", "4", "15", "10", "Yes"],
+  ["Abhay Mamgain", "01 - Refine", "ATMOSPHERE PRESS, LLC", "SMB AM - atmospherepress.com- 12 * New - GWS Gemini Enterprise Business #GE #FY26_AWT_Renewal", "3024.00", "", "", "24/8 quote has been sent, 28/8 will follow up", "", "API: Sales Systems Integration", "6", "8", "12", "Yes"],
+  ["Abhay Mamgain", "01 - Refine", "Premiercare Health Services, Inc.", "SMB AM - procaremso.com - 25* New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "1050.00", "", "", "26/8 follow up done, waiting on responce", "", "Abhay Mamgain", "4", "15", "25", "Yes"],
+  ["Abhay Mamgain", "01 - Refine", "Your Preferred Printer, L.L.C.", "SMB AM - ypprint.com - 12 * New - GWS Gemini Enterprise Business#GE #FY26_AWT_Renewal", "3024.00", "2026-08-20", "20-Aug-2026", "20/8 quote sent, 27/8 follow up", "2026-08-20", "API: Sales Systems Integration", "8", "12", "12", "Yes"],
+  ["Abhay Mamgain", "01 - Refine", "Orchard Learning & Behavior Services, LLC", "SMB AM - orchardbehavior.com - 12 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "2016.00", "2026-08-17", "25-Aug-2026", "22/8 followed up with client, no reply yet", "2026-08-25", "Abhay Mamgain", "5", "15", "12", "Yes"],
+  ["Abhay Mamgain", "01 - Refine", "Onspring Technologies LLC", "SMB AM - onspring.com - 25* New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "6300.00", "", "", "21/8 followed up on the quote", "", "Abhay Mamgain", "7", "15", "25", "Yes"],
+  ["Abhay Mamgain", "01 - Refine", "SOLARA THERAPY, LIMITED", "SMB AM - solara--therapy.com - 8 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "2016.00", "", "", "26/8 followed up, will follow up on the 31/8", "", "Abhay Mamgain", "4", "15", "8", "Yes"],
+  ["Abhay Mamgain", "01 - Refine", "Nuve", "SMB AM - nuvehome.com - 25* New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "6300.00", "", "", "26/8 follow up done", "", "Abhay Mamgain", "4", "15", "25", "Yes"],
+  ["Abhay Mamgain", "01 - Refine", "Veritus Group", "SMB AM - veritusgroup.com- 12 * New - GWS Gemini Enterprise Business #GE #FY26_AWT_Renewal", "3024.00", "", "", "24/8 meeting today", "", "API: Sales Systems Integration", "", "8", "12", "Yes"],
+  ["Abhay Mamgain", "01 - Refine", "Arul, LLC", "SMB AM - arul.ai - 12 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "630.00", "", "", "21/8 sent the calendar link, will follow up on 25/8", "", "API: Sales Systems Integration", "7", "15", "15", "Yes"],
+  ["Abhay Mamgain", "01 - Refine", "Simx, Inc.", "SMB AM - simxar.com - 12 * New - GWS Gemini Enterprise Plus #GE #FY26_AWT_Renewal", "3024.00", "", "", "31/8 followed up", "", "Abhay Mamgain", "1", "12", "12", "Yes"],
+  ["Abhay Mamgain", "01 - Refine", "Innovative Building Solutions LLC", "SMB AM - ibsbuild.com- 8* New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "336.00", "", "", "19/8 Will send the quote", "", "API: Sales Systems Integration", "4", "15", "8", "Yes"],
+  ["Abhay Mamgain", "01 - Refine", "Chronos Systems Poland", "SMB AM - chronosconsulting.com - 12 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "3024.00", "", "", "20/8 quote sent, 27/8 follow up", "", "Abhay Mamgain", "7", "15", "12", "Yes"],
+  ["Abhay Mamgain", "01 - Refine", "d206tm.org", "SMB AM - d206tm.org - 7* New - GWS Gemini Enterprise Business GE #FY26_AWT_Renewal", "21.00", "", "", "21/8 meeting set", "", "API: Sales Systems Integration", "", "12", "1", "Yes"],
+  ["Abhay Mamgain", "01 - Refine", "Shr Communications, LLC", "SMB AM - shrengineering.com - 12 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "3024.00", "", "", "26/8 followed up with client, will wait for a reply", "", "Abhay Mamgain", "4", "14", "12", "Yes"],
+  ["Abhay Mamgain", "01 - Refine", "The Faithful Platform LLC", "SMB AM - faithfulplatform.com- 12 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "3024.00", "", "", "24/8 will follow up", "", "API: Sales Systems Integration", "7", "13", "12", "Yes"],
+  ["Abhay Mamgain", "01 - Refine", "Milk Moovement", "SMB AM - milkmoovement.com - 12 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "4176.00", "", "", "21/8 follow up sent, next follow up 25/8", "", "Abhay Mamgain", "7", "18", "12", "Yes"],
+  ["Abhay Mamgain", "01 - Refine", "Missourian Publishing Company", "SMB AM - emissourian.com- 12* New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "864.00", "", "", "18/8 followed up with the customer so I can send a new quote", "", "Abhay Mamgain", "5", "25", "12", "Yes"],
+  ["Abhay Mamgain", "01 - Refine", "Deetox Pllc", "SMB AM - deetox.org- 5 * New - GWS Gemini Enterprise Business #GE #FY26_AWT_Renewal", "3024.00", "", "", "24/8 Followed up with for a meeting as they wanted to schedule a call", "", "API: Sales Systems Integration", "6", "8", "12", "Yes"],
+  ["Abhay Mamgain", "01 - Refine", "Slate Dental Inc", "SMB AM - slateflosser.com - 6 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "1209.60", "", "", "31/8 sent the contract, waiting for customer to sign", "", "Abhay Mamgain", "1", "22", "6", "No"],
+  ["Abhay Mamgain", "01 - Refine", "PBG Logistics Sdn Bhd", "SMB AM - pbxlogistics.com - 25 - NEW - Gemini Enterprise Business #GE #FY26_AWT_Renewal", "3522.00", "", "", "08/14/2026 [schedule] [Owner: Jake Darnell]", "", "Jake Darnell", "", "18", "25", "Yes"],
+  ["Abhay Mamgain", "01 - Refine", "Highland Cassidy LLC", "SMB AM - highlandhomes.org - 12 * New - GWS Gemini Enterprise Business #GE #FY26_AWT_Renewal", "3024.00", "", "", "24/8 sent quote, will follow up soon", "", "API: Sales Systems Integration", "6", "8", "12", "Yes"],
+  ["Abhay Mamgain", "01 - Refine", "Valhalla Life Sciences", "SMB AM - valhallalifesciences.com- 5* New - GWS Gemini Enterprise Business #GE #FY26_AWT_Renewal", "1260.00", "", "", "25/8 sent my calendar as client wants to have a call", "", "API: Sales Systems Integration", "6", "8", "5", "Yes"],
+  ["Abhay Mamgain", "01 - Refine", "Kluge Strategic Inc.", "SMB AM - klugeinteractive.com - 12 * New - GWS Gemini Enterprise Business #GE #FY26_AWT_Renewal", "2016.00", "", "", "28/8 sent my Google calendar for a meeting", "", "API: Sales Systems Integration", "3", "5", "8", "No"],
+  ["Abhay Mamgain", "01 - Refine", "Pioneer Academics", "SMB AM - pioneeracademics.com- 12 * New - GWS Gemini Enterprise Business#GE #FY26_AWT_Renewal", "3024.00", "", "", "26/8 followed up, will follow up on the 28/8", "", "API: Sales Systems Integration", "5", "8", "12", "No"],
+  ["Abhay Mamgain", "01 - Refine", "Henderson Sothebys International Realty", "SMB AM - callawayhenderson.com - 40 * New - GWS Gemini Enterprise Business #GE #FY26_AWT_Renewal", "10080.00", "", "", "28/8 sent quote, will follow up next week", "", "API: Sales Systems Integration", "2", "4", "40", "No"],
+  ["Abhay Mamgain", "01 - Refine", "Nineteen 61, LLC", "SMB AM - nineteen61.com- 8 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "2016.00", "", "", "28/8 sent my Google calendar for a meeting", "", "API: Sales Systems Integration", "3", "5", "8", "No"],
+  ["Abhay Mamgain", "01 - Refine", "Recovery Keys Inc.", "SMB AM - recoverykeys.org - 12 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "3024.00", "2026-08-17", "26-Aug-2026", "26/8 follow up done, will wait for a reply", "2026-08-26", "Abhay Mamgain", "4", "15", "12", "Yes"],
+  ["Abhay Mamgain", "01 - Refine", "Compleo Physical Therapy & Wellness, LLC", "Compleo Physical Therapy & Wellness, LLC-Renewal-Gemini Enterprise-2027", "2361.60", "2026-08-22", "", "", "2026-08-22", "API: Sales Systems Integration", "", "10", "8", "No"],
+  ["Aman Dwivedi", "01 - Refine", "BrightQuery", "SMB AM - brightquery.com - #11 - NEW Gemini Enterprise Business #GE #softbundle", "2772.00", "", "", "Second follow up meet with Partner - 24/08/26", "", "Aman Dwivedi", "6", "13", "11", "Yes"],
+  ["Aman Dwivedi", "01 - Refine", "Nimblemind.ai", "SMB AM - fifthera.com - #15 - NEW Gemini Enterprise Business #GE #softbundle", "3780.00", "", "", "25/08/26 follow up done - next follow up 31/08/26", "", "Aman Dwivedi", "5", "12", "15", "Yes"],
+  ["Aman Dwivedi", "01 - Refine", "happiestbaby", "SMB AM -happiestbaby.com - #20 - NEW Gemini Enterprise Business #GE #softbundle", "2772.00", "", "", "24/08/26 sent a follow up -Next follow up 31/08/26", "", "Aman Dwivedi", "6", "13", "11", "Yes"],
+  ["Aman Dwivedi", "01 - Refine", "Axispoint, Inc.", "SMB AM - axispoint.com - #11 - NEW Gemini Enterprise Business #GE #softbundle", "2772.00", "", "", "25/08/26 follow up done - next follow up 31/08/26", "", "API: Sales Systems Integration", "5", "21", "11", "Yes"],
+  ["Aman Dwivedi", "01 - Refine", "Genesis Gaming Solutions Inc", "SMB AM - genesisgaming.com - #35 - NEW Gemini Enterprise Business #GE #softbundle", "2772.00", "", "", "25/08/26 follow up done - next follow up 31/08/26", "", "Aman Dwivedi", "5", "21", "11", "Yes"]
+];
+
 /* ─────────── State ─────────── */
 let raw = [], tableRows = [], view = "leadership";
 const charts = {};
 
-/* ─────────── Load & Clean Data ─────────── */
+/* ─────────── Helpers ─────────── */
+const normalize = s => String(s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+const toNum = v => parseFloat(String(v ?? "").replace(/[^0-9.\-]/g, "")) || 0;
+const money = n => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+const fmtISO = d => d ? d.toISOString().slice(0, 10) : "";
+const monthKey = d => d ? d.toLocaleDateString("en-US", { month: "short", year: "numeric" }) : "Unassigned";
+
 const parseDate = v => {
   if (!v) return null;
   if (typeof v === "string" && v.startsWith("Date(")) {
@@ -108,23 +194,62 @@ const parseDate = v => {
   return isNaN(d) ? null : d;
 };
 
-const toNum = v => parseFloat(String(v ?? "").replace(/[^0-9.\-]/g, "")) || 0;
-const money = n => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
-const fmtISO = d => d.toISOString().slice(0, 10);
-const monthKey = d => d.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+/* ─────────── Ingestion Pipeline ─────────── */
+function processMatrix(headers, rows) {
+  const normHeaders = headers.map(h => normalize(h));
+  const findCol = target => {
+    const normTarget = normalize(target);
+    const exact = normHeaders.indexOf(normTarget);
+    if (exact !== -1) return headers[exact];
+    const fuzzy = normHeaders.findIndex(h => h.includes(normTarget) || normTarget.includes(h));
+    return fuzzy !== -1 ? headers[fuzzy] : target;
+  };
+
+  const keyMap = {
+    date: findCol("Created Date") || findCol("Date"),
+    manager: findCol("Opportunity Owner") || findCol("Owner") || findCol("Manager"),
+    account: findCol("Account Name") || findCol("Account"),
+    revenue: findCol("Amount") || findCol("Revenue"),
+    status: findCol("Stage") || findCol("Status"),
+  };
+
+  raw = rows.map(r => {
+    const obj = {};
+    headers.forEach((h, i) => obj[h] = r[i] ?? "");
+    return {
+      ...obj,
+      _date: parseDate(obj[keyMap.date] || obj["Last Modified Date"]),
+      _revenue: toNum(obj[keyMap.revenue]),
+      _account: obj[keyMap.account] || "Unnamed Account",
+      _manager: obj[keyMap.manager] || "Unassigned",
+      _status: obj[keyMap.status] || "01 - Refine"
+    };
+  });
+
+  populateDropdowns();
+  render();
+  document.getElementById("status").textContent = `✅ ${raw.length} opportunities loaded · updated ${new Date().toLocaleTimeString()}`;
+}
 
 async function loadData() {
   const status = document.getElementById("status");
-  status.textContent = "Loading pipeline data…";
-  const id = CONFIG.SHEET_URL.match(/\/d\/([a-zA-Z0-9_-]+)/)?.;
+  status.textContent = "Connecting to Google Sheet…";
+
+  const id = CONFIG.SHEET_URL.match(/\/d\/([a-zA-Z0-9_-]+)/)?.[1];
   if (!id) {
-    status.innerHTML = `❌ No valid sheet ID found in <code class="bg-gray-100 px-1">CONFIG.SHEET_URL</code>.`;
+    loadEmbeddedFallback("Invalid URL — loaded embedded dataset");
     return;
   }
+
   const url = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:json&headers=1`;
   try {
-    const text = await (await fetch(url)).text();
-    const json = JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf(")") + 1));
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const text = await res.text();
+    
+    // Clean GViz wrapper
+    const cleanJson = text.replace(/^.*setResponse\(|\);?$/gs, '').trim();
+    const json = JSON.parse(cleanJson);
     if (json.status === "error") throw new Error(json.errors?.[0]?.detailed_message || "Sheet error");
 
     let headers = json.table.cols.map(c => c.label || "");
@@ -134,29 +259,29 @@ async function loadData() {
       rowsRaw = rowsRaw.slice(1);
     }
 
-    raw = rowsRaw.map(r => {
-      const row = {};
-      headers.forEach((h, i) => row[h] = r.c?.[i]?.f ?? r.c?.[i]?.v ?? "");
-      return { ...row, _date: parseDate(row[CONFIG.COLS.date]), _revenue: toNum(row[CONFIG.COLS.revenue]) };
-    }).filter(r => r._date);
-
-    populateDropdowns();
-    render();
-    status.textContent = `✅ ${raw.length} opportunities loaded · updated ${new Date().toLocaleTimeString()}`;
-  } catch (e) {
-    status.innerHTML = `❌ Could not load sheet data.<br><span class="text-xs text-gray-500">${e.message}</span>`;
+    const dataMatrix = rowsRaw.map(r => r.c.map(cell => cell?.f ?? cell?.v ?? ""));
+    processMatrix(headers, dataMatrix);
+  } catch (err) {
+    console.warn("Live fetch failed (likely private Google Sheet), loading embedded fallback:", err);
+    loadEmbeddedFallback("Private Sheet detected — loaded direct pipeline data");
   }
 }
 
-/* ─────────── Filters ─────────── */
+function loadEmbeddedFallback(reason) {
+  const headers = EMBEDDED_DATA[0];
+  const rows = EMBEDDED_DATA.slice(1);
+  processMatrix(headers, rows);
+  document.getElementById("status").textContent = `ℹ️ ${reason} (${raw.length} records active)`;
+}
+
+/* ─────────── Filters & Search ─────────── */
 function populateDropdowns() {
-  const C = CONFIG.COLS;
   const fill = (el, vals, label) => {
     el.innerHTML = `<option value="">${label}</option>` +
-      [...new Set(vals.filter(Boolean))].sort().map(v => `<option>${v}</option>`).join("");
+      [...new Set(vals.filter(Boolean))].sort().map(v => `<option value="${v}">${v}</option>`).join("");
   };
-  fill(document.getElementById("managerFilter"), raw.map(r => r[C.manager]), "All Owners");
-  fill(document.getElementById("statusFilter"),  raw.map(r => r[C.status]),  "All Stages");
+  fill(document.getElementById("managerFilter"), raw.map(r => r._manager), "All Owners");
+  fill(document.getElementById("statusFilter"),  raw.map(r => r._status),  "All Stages");
 }
 
 function setRange(days) {
@@ -169,16 +294,16 @@ function setRange(days) {
 }
 
 function getFiltered() {
-  const C = CONFIG.COLS;
   const from = document.getElementById("dateFrom").value;
   const to   = document.getElementById("dateTo").value;
   const mgr  = document.getElementById("managerFilter").value;
   const st   = document.getElementById("statusFilter").value;
+
   return raw.filter(r => {
-    if (from && r._date < new Date(from)) return false;
-    if (to && r._date > new Date(to + "T23:59:59")) return false;
-    if (view === "manager" && mgr && r[C.manager] !== mgr) return false;
-    if (st && r[C.status] !== st) return false;
+    if (from && r._date && r._date < new Date(from)) return false;
+    if (to && r._date && r._date > new Date(to + "T23:59:59")) return false;
+    if (view === "manager" && mgr && r._manager !== mgr) return false;
+    if (st && r._status !== st) return false;
     return true;
   });
 }
@@ -186,8 +311,8 @@ function getFiltered() {
 /* ─────────── Tabs ─────────── */
 function setTab(t) {
   view = t;
-  const on = "rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm";
-  const off = "rounded-lg border bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 shadow-sm";
+  const on = "rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-blue-700";
+  const off = "rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50";
   document.getElementById("tab-leadership").className = t === "leadership" ? on : off;
   document.getElementById("tab-manager").className = t === "manager" ? on : off;
   document.getElementById("managerFilter").classList.toggle("hidden", t !== "manager");
@@ -195,118 +320,15 @@ function setTab(t) {
   render();
 }
 
-/* ─────────── Aggregations ─────────── */
-function groupMonthly(rows) {
-  const m = new Map();
-  rows.forEach(r => {
-    const d = new Date(r._date.getFullYear(), r._date.getMonth(), 1);
-    m.set(d.getTime(), (m.get(d.getTime()) || 0) + r._revenue);
-  });
-  return [...m.entries()].sort((a, b) => a[0] - b[0]).map(([t, rev]) => ({ date: new Date(t), revenue: rev }));
-}
-
 /* ─────────── KPI Cards ─────────── */
 function kpiCard(label, val, delta, color, sub) {
-  return `<div class="rounded-xl border bg-white p-4 shadow-sm">
-    <p class="text-xs font-medium text-gray-500">${label}</p>
-    <p class="text-xl font-bold mt-1 ${color || 'text-gray-900'}">${val}</p>
-    ${delta ? `<p class="text-xs mt-1 ${delta.startsWith("▲") ? "text-green-600" : "text-red-600"} font-medium">${delta} vs prior mo.</p>` : ""}
-    ${sub ? `<p class="text-xs mt-1 text-gray-400">${sub}</p>` : ""}</div>`;
+  return `<div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <p class="text-xs font-bold uppercase tracking-wider text-slate-400">${label}</p>
+    <p class="text-xl font-black mt-1 ${color || 'text-slate-900'}">${val}</p>
+    ${delta ? `<p class="text-xs mt-1 font-semibold ${delta.startsWith("▲") ? "text-emerald-600" : "text-rose-600"}">${delta}</p>` : ""}
+    ${sub ? `<p class="text-xs mt-0.5 text-slate-400 font-medium">${sub}</p>` : ""}</div>`;
 }
 
 function renderKpis(rows) {
-  const C = CONFIG.COLS;
-  const revenue = rows.reduce((s, r) => s + r._revenue, 0);
-  const accounts = new Set(rows.map(r => r[C.account]).filter(Boolean));
-  const active = new Set(rows.filter(r => !String(r[C.status]).toLowerCase().includes("lost") && !String(r[C.status]).toLowerCase().includes("closed")).map(r => r[C.account]));
-  const avg = accounts.size ? revenue / accounts.size : 0;
-  const monthly = groupMonthly(rows);
-  const cur = monthly.at(-1)?.revenue ?? 0, prev = monthly.at(-2)?.revenue ?? 0;
-  const mom = prev ? (cur - prev) / prev * 100 : null;
-  const momStr = mom === null ? "—" : `${mom >= 0 ? "▲" : "▼"} ${mom >= 0 ? "+" : ""}${mom.toFixed(1)}%`;
-  const byMgr = new Map();
-  rows.forEach(r => { if (r[C.manager]) byMgr.set(r[C.manager], (byMgr.get(r[C.manager]) || 0) + r._revenue); });
-  const top = [...byMgr.entries()].sort((a, b) => b - a)[0];
-
-  document.getElementById("kpis").innerHTML =
-    kpiCard("Total Pipeline Value", money(revenue), momStr) +
-    kpiCard("Total Accounts", accounts.size) +
-    kpiCard("Active Accounts", active.size) +
-    kpiCard("Avg Deal / Account", money(avg)) +
-    kpiCard("MoM Pipeline Growth", mom === null ? "—" : `${mom >= 0 ? "+" : ""}${mom.toFixed(1)}%`, null, mom === null ? "" : (mom >= 0 ? "text-green-600" : "text-red-600")) +
-    kpiCard("Top Opportunity Owner", top ? top[0] : "—", null, "text-blue-600", top ? money(top) : "");
-}
-
-/* ─────────── Charts ─────────── */
-function makeChart(id, cfg) {
-  charts[id]?.destroy();
-  charts[id] = new Chart(document.getElementById(id), cfg);
-}
-const yMoney = { ticks: { callback: v => money(v) } };
-
-function renderCharts(rows) {
-  const C = CONFIG.COLS;
-  const monthly = groupMonthly(rows);
-  makeChart("lineChart", {
-    type: "line",
-    data: {
-      labels: monthly.map(m => monthKey(m.date)),
-      datasets: [{ data: monthly.map(m => m.revenue), borderColor: "#2563eb", backgroundColor: "rgba(37,99,235,.12)", fill: true, tension: .35, pointRadius: 4 }]
-    },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: yMoney } }
-  });
-
-  const byMgr = new Map();
-  rows.forEach(r => { if (r[C.manager]) byMgr.set(r[C.manager], (byMgr.get(r[C.manager]) || 0) + r._revenue); });
-  const mgrs = [...byMgr.entries()].sort((a, b) => b - a);
-  makeChart("barChart", {
-    type: "bar",
-    data: {
-      labels: mgrs.map(e => e[0]),
-      datasets: [{ data: mgrs.map(e => e), backgroundColor: "#2563eb", borderRadius: 4 }]
-    },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: yMoney } }
-  });
-
-  const per = new Map();
-  rows.forEach(r => {
-    const s = String(r[C.status] || "Unknown").trim() || "Unknown";
-    if (!r[C.account]) return;
-    if (!per.has(s)) per.set(s, new Set());
-    per.get(s).add(r[C.account]);
-  });
-  makeChart("donutChart", {
-    type: "doughnut",
-    data: {
-      labels: [...per.keys()],
-      datasets: [{ data: [...per.values()].map(s => s.size), backgroundColor: ["#2563eb", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#64748b"] }]
-    },
-    options: { responsive: true, maintainAspectRatio: false, cutout: "60%", plugins: { legend: { position: "right" } } }
-  });
-
-  const acc = new Map();
-  rows.forEach(r => { if (r[C.account]) acc.set(r[C.account], (acc.get(r[C.account]) || 0) + r._revenue); });
-  const top10 = [...acc.entries()].sort((a, b) => b - a).slice(0, 10);
-  makeChart("topChart", {
-    type: "bar",
-    data: {
-      labels: top10.map(e => e[0]),
-      datasets: [{ data: top10.map(e => e), backgroundColor: "#10b981", borderRadius: 4 }]
-    },
-    options: { indexAxis: "y", responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: yMoney } }
-  });
-}
-
-/* ─────────── Table ─────────── */
-let sortState = { key: null, dir: 1 };
-function sortBy(col) {
-  sortState = { key: col, dir: sortState.key === col ? -sortState.dir : 1 };
-  renderTable();
-}
-
-function renderTable(rows) {
-  const C = CONFIG.COLS;
-  const q = document.getElementById("search").value.toLowerCase();
-  let list = (rows ?? getFiltered()).filter(r =>
-    !q || Object.values(C).some(h => String(r[h] ?? "").toLowerCase().includes(q)));
-  if (sortState.key
+  const totalRev = rows.reduce((s, r) => s + r._revenue, 0);
+  const accounts = new Set(rows.map(r => r._account).filter(Boolean))
