@@ -4,331 +4,130 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sales Pipeline & Accounts Dashboard</title>
-  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    *, ::before, ::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f8fafc; color: #1e293b; line-height: 1.5; }
+    .container { max-width: 1280px; margin: 0 auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
+    .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .btn { display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; padding: 0.4rem 0.75rem; border-radius: 0.5rem; cursor: pointer; border: 1px solid #cbd5e1; background: #fff; color: #334155; }
+    .btn:hover { background: #f1f5f9; }
+    .btn-primary { background: #2563eb; color: #fff; border-color: #2563eb; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.7rem; }
+    .input { border: 1px solid #cbd5e1; border-radius: 0.375rem; padding: 0.35rem 0.6rem; font-size: 0.75rem; background: #fff; color: #334155; outline: none; }
+    .input:focus { border-color: #2563eb; }
+    .grid-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
+    .grid-charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap: 1.25rem; }
+    .badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; }
+    .badge-blue { background: #eff6ff; color: #1d4ed8; }
+    .badge-rose { background: #ffe4e6; color: #be123c; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+    th { padding: 0.75rem 1rem; background: #f1f5f9; color: #475569; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em; cursor: pointer; user-select: none; border-bottom: 1px solid #e2e8f0; text-align: left; }
+    th:hover { background: #e2e8f0; }
+    td { padding: 0.65rem 1rem; border-bottom: 1px solid #f1f5f9; color: #334155; }
+    tr:hover td { background: #f8fafc; }
+    .truncate { max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .flex-wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+  </style>
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-800">
-<div class="mx-auto max-w-7xl space-y-5 p-6">
+<body>
 
+<div class="container">
   <!-- ══════════ HEADER ══════════ -->
-  <div class="flex flex-wrap items-center justify-between gap-4">
+  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
     <div>
-      <h1 class="text-2xl font-bold tracking-tight text-slate-900">📊 Sales Pipeline & Accounts Dashboard</h1>
-      <p id="status" class="text-xs font-medium text-slate-500">Initializing…</p>
+      <h1 style="font-size: 1.5rem; font-weight: 800; color: #0f172a;">📊 Sales Pipeline & Accounts Dashboard</h1>
+      <p id="status" style="font-size: 0.75rem; color: #64748b; margin-top: 0.2rem;">⚡ Instant load ready</p>
     </div>
-    <div class="flex flex-wrap items-center gap-2">
-      <button id="tab-leadership" onclick="setTab('leadership')" class="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-blue-700">Leadership View</button>
-      <button id="tab-manager" onclick="setTab('manager')" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">Manager View</button>
-      <button onclick="exportCSV()" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50">⬇ Export CSV</button>
-      <button onclick="toggleDataModal()" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50">⚙️ Data Source</button>
-      <button onclick="loadData()" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50">↻ Sync</button>
+    <div class="flex-wrap">
+      <button id="tab-leadership" onclick="setTab('leadership')" class="btn btn-primary">Leadership View</button>
+      <button id="tab-manager" onclick="setTab('manager')" class="btn">Manager View</button>
+      <button onclick="exportCSV()" class="btn">⬇ Export CSV</button>
+      <button onclick="syncLiveSheet()" class="btn">↻ Sync Live Sheet</button>
     </div>
   </div>
 
   <!-- ══════════ FILTERS BAR ══════════ -->
-  <div class="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
-    <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Filters:</span>
-    <button onclick="setRange('all')"  class="rounded-md border border-slate-200 px-2.5 py-1 text-xs font-medium hover:bg-slate-50">All Time</button>
-    <button onclick="setRange(30)"     class="rounded-md border border-slate-200 px-2.5 py-1 text-xs font-medium hover:bg-slate-50">30 Days</button>
-    <button onclick="setRange(90)"     class="rounded-md border border-slate-200 px-2.5 py-1 text-xs font-medium hover:bg-slate-50">90 Days</button>
-    <button onclick="setRange('ytd')"  class="rounded-md border border-slate-200 px-2.5 py-1 text-xs font-medium hover:bg-slate-50">YTD</button>
-    
-    <input type="date" id="dateFrom" onchange="render()" class="rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-700" />
-    <span class="text-xs text-slate-400">→</span>
-    <input type="date" id="dateTo" onchange="render()" class="rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-700" />
-    
-    <select id="statusFilter" onchange="render()" class="rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-700 font-medium">
-      <option value="">All Stages</option>
-    </select>
-    
-    <select id="managerFilter" onchange="render()" class="hidden rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-700 font-medium">
-      <option value="">All Owners</option>
-    </select>
-    
-    <input id="search" oninput="onSearch()" placeholder="🔍 Search table…" class="ml-auto rounded-md border border-slate-300 px-3 py-1 text-xs text-slate-700 w-52" />
+  <div class="card" style="padding: 0.75rem 1rem;">
+    <div class="flex-wrap" style="justify-content: space-between;">
+      <div class="flex-wrap">
+        <span style="font-size: 0.7rem; font-weight: 700; color: #94a3b8; text-transform: uppercase;">Range:</span>
+        <button onclick="setRange('all')" class="btn btn-sm">All Time</button>
+        <button onclick="setRange(30)" class="btn btn-sm">30 Days</button>
+        <button onclick="setRange(90)" class="btn btn-sm">90 Days</button>
+        <button onclick="setRange('ytd')" class="btn btn-sm">YTD</button>
+        <input type="date" id="dateFrom" onchange="render()" class="input" />
+        <span style="color: #94a3b8; font-size: 0.75rem;">→</span>
+        <input type="date" id="dateTo" onchange="render()" class="input" />
+        <select id="statusFilter" onchange="render()" class="input"><option value="">All Stages</option></select>
+        <select id="managerFilter" onchange="render()" class="input" style="display: none;"><option value="">All Owners</option></select>
+      </div>
+      <input id="search" oninput="onSearch()" placeholder="🔍 Search pipeline…" class="input" style="min-width: 220px;" />
+    </div>
   </div>
 
   <!-- ══════════ KPI CARDS ══════════ -->
-  <div id="kpis" class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6"></div>
+  <div id="kpis" class="grid-kpis"></div>
 
   <!-- ══════════ CHARTS ROW 1 ══════════ -->
-  <div class="grid gap-5 lg:grid-cols-2">
-    <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-      <h2 class="mb-3 text-sm font-bold text-slate-800">📈 Pipeline Revenue Over Time</h2>
-      <div class="relative h-64"><canvas id="lineChart"></canvas></div>
+  <div class="grid-charts">
+    <div class="card" style="padding: 1rem;">
+      <h3 style="font-size: 0.875rem; font-weight: 700; margin-bottom: 0.75rem;">📈 Pipeline Revenue Over Time</h3>
+      <div style="position: relative; height: 260px;"><canvas id="lineChart"></canvas></div>
     </div>
-    <div id="barCard" class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-      <h2 class="mb-3 text-sm font-bold text-slate-800">👤 Pipeline by Opportunity Owner</h2>
-      <div class="relative h-64"><canvas id="barChart"></canvas></div>
+    <div id="barCard" class="card" style="padding: 1rem;">
+      <h3 style="font-size: 0.875rem; font-weight: 700; margin-bottom: 0.75rem;">👤 Pipeline by Opportunity Owner</h3>
+      <div style="position: relative; height: 260px;"><canvas id="barChart"></canvas></div>
     </div>
   </div>
 
   <!-- ══════════ CHARTS ROW 2 ══════════ -->
-  <div class="grid gap-5 lg:grid-cols-2">
-    <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-      <h2 class="mb-3 text-sm font-bold text-slate-800">📊 Deals by Opportunity Stage</h2>
-      <div class="relative h-64"><canvas id="donutChart"></canvas></div>
+  <div class="grid-charts">
+    <div class="card" style="padding: 1rem;">
+      <h3 style="font-size: 0.875rem; font-weight: 700; margin-bottom: 0.75rem;">📊 Opportunities by Stage</h3>
+      <div style="position: relative; height: 260px;"><canvas id="donutChart"></canvas></div>
     </div>
-    <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-      <h2 class="mb-3 text-sm font-bold text-slate-800">🏢 Top 10 Accounts by Pipeline Value</h2>
-      <div class="relative h-64"><canvas id="topChart"></canvas></div>
+    <div class="card" style="padding: 1rem;">
+      <h3 style="font-size: 0.875rem; font-weight: 700; margin-bottom: 0.75rem;">🏢 Top 10 Accounts by Revenue</h3>
+      <div style="position: relative; height: 260px;"><canvas id="topChart"></canvas></div>
     </div>
   </div>
 
   <!-- ══════════ DATA TABLE ══════════ -->
-  <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-    <div class="overflow-x-auto">
-      <table class="w-full text-left text-xs">
-        <thead id="tableHead" class="bg-slate-100 text-slate-700 font-semibold uppercase tracking-wider"></thead>
-        <tbody id="tableBody" class="divide-y divide-slate-100"></tbody>
+  <div class="card" style="overflow: hidden;">
+    <div style="overflow-x: auto;">
+      <table>
+        <thead id="tableHead"></thead>
+        <tbody id="tableBody"></tbody>
       </table>
     </div>
-    <p id="tableFoot" class="border-t border-slate-100 px-4 py-2 text-xs text-slate-400"></p>
-  </div>
-</div>
-
-<!-- ══════════ DATA MODAL ══════════ -->
-<div id="dataModal" class="fixed inset-0 z-50 flex hidden items-center justify-center bg-slate-900/50 p-4">
-  <div class="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl space-y-4">
-    <div class="flex items-center justify-between">
-      <h3 class="text-base font-bold text-slate-800">⚙️ Data Source Settings</h3>
-      <button onclick="toggleDataModal()" class="text-slate-400 hover:text-slate-600">✕</button>
-    </div>
-    <p class="text-xs text-slate-500">Sync with a live Google Sheet URL or paste CSV rows below:</p>
-    <input id="sheetUrlInput" type="text" class="w-full rounded-lg border border-slate-300 p-2 text-xs" placeholder="https://docs.google.com/spreadsheets/d/..." />
-    <textarea id="csvPasteInput" rows="6" class="w-full rounded-lg border border-slate-300 p-2 font-mono text-xs" placeholder="Paste CSV data here..."></textarea>
-    <div class="flex justify-end gap-2">
-      <button onclick="saveAndReloadSource()" class="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700">Apply & Reload</button>
-    </div>
+    <div id="tableFoot" style="padding: 0.75rem 1rem; font-size: 0.75rem; color: #94a3b8; border-top: 1px solid #f1f5f9;"></div>
   </div>
 </div>
 
 <script>
 /* ═══════════════════════════════════════════════════════════════
-   PRE-EMBEDDED PIPELINE DATASET & CONFIGURATION
+   PRE-LOADED PIPELINE RECORDS
    ═══════════════════════════════════════════════════════════════ */
-const CONFIG = {
-  SHEET_URL: "https://docs.google.com/spreadsheets/d/1I696sG9CTFIfBgSeDo0gsxfgFjg_eN2skPSNQgGXqvo/edit",
-  COLS: {
-    date:    "Created Date",
-    manager: "Opportunity Owner",
-    account: "Account Name",
-    revenue: "Amount",
-    status:  "Stage",
-  },
-  REFRESH_MINUTES: 5,
-};
-
-// Embedded dataset from Consolidated Pipeline Report
-const EMBEDDED_DATA = [
-  ["Opportunity Owner", "Stage", "Account Name", "Opportunity Name", "Amount", "Created Date", "Last Activity", "Next Step", "Last Modified Date", "Last Modified By", "No Activity Days", "Age", "Opportunity Quantity", "In Stale Pipeline"],
-  ["Aakanksha Kumari", "01 - Refine", "Pied Parker, Inc.", "SMB AM-piedparker.com-12 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "15321.60", "2026-08-12", "", "Sent an email on August 21; follow-up scheduled for August 29.", "2026-08-27", "Aakanksha Kumari", "", "20", "76", "Yes"],
-  ["Aakanksha Kumari", "01 - Refine", "POWER AIR SYSTEM COMPANY LIMITED", "SMB AM-powerairsystem.co.th-12 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "4536.00", "2026-08-12", "", "Email sent on 8/18, follow-up on 8/21.", "2026-08-20", "Aakanksha Kumari", "", "20", "45", "Yes"],
-  ["Aakanksha Kumari", "01 - Refine", "FX Bridge", "SMB AM-fxbridge.co - * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "5376.00", "2026-08-12", "", "Email sent on 8/21, follow-up on 8/29.", "2026-08-27", "Aakanksha Kumari", "", "20", "32", "Yes"],
-  ["Aakanksha Kumari", "01 - Refine", "VIP Dinero", "SMB AM-vipdinero.com-36 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "302.40", "2026-08-12", "", "Sent an email on 8/21; follow-up scheduled for 8/29.", "2026-08-27", "Aakanksha Kumari", "", "20", "36", "Yes"],
-  ["Aakanksha Kumari", "01 - Refine", "PREMIER DRIVING SCHOOL, INC.", "SMB AM-premierdriversed.com -48 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "403.20", "2026-08-12", "", "Sent an email on August 21; follow-up scheduled for August 29.", "2026-08-27", "Aakanksha Kumari", "", "20", "48", "Yes"],
-  ["Aakanksha Kumari", "01 - Refine", "Tapis Corporation", "SMB AM-tapiscorp.com-58 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "29232.00", "2026-08-12", "", "Email sent on 8/21, follow-up on 8/29.", "2026-08-27", "Aakanksha Kumari", "", "20", "58", "Yes"],
-  ["Aakanksha Kumari", "01 - Refine", "Floret", "SMB AM-tryfloret.com -31* New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "6249.60", "", "", "Sent an email on August 21; follow-up scheduled for August 29.", "", "API: Sales Systems Integration", "", "20", "31", "Yes"],
-  ["Aakanksha Kumari", "01 - Refine", "Ivyland Counseling Center Inc.", "SMB AM-ivylandcounselingcenter.com-57 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "15048.00", "", "", "Sent an email on August 21; follow-up scheduled for August 29.", "", "Aakanksha Kumari", "", "20", "57", "Yes"],
-  ["Aakanksha Kumari", "01 - Refine", "Valley Case Management & Consulting Services LLC", "SMB AM-valleycasemanagement.com -65 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "17160.00", "", "", "Sent an email on August 21; follow-up scheduled for August 29", "", "Aakanksha Kumari", "", "20", "65", "Yes"],
-  ["Aakanksha Kumari", "01 - Refine", "Kimmel Studio Architects", "SMB AM-kimmelstudio.com -65 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "23400.00", "", "", "send meeting link for 8/21,follow up scheduled for 8/29", "", "Aakanksha Kumari", "", "20", "65", "Yes"],
-  ["Aakanksha Kumari", "01 - Refine", "Raccoon Logic Studios Inc.", "SMB AM-raccoonlogic.com -27 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "13978.80", "", "", "send a quotation to the customer,they have yet not decided anything", "", "Aakanksha Kumari", "11", "19", "33", "Yes"],
-  ["Aakanksha Kumari", "03 - Proposal/Negotiation", "Monkhouse Law", "SMB AM-monkhouselaw.com -52 * - Google workspace Enterprise plus renewal", "26208.00", "", "", "Had a meeting with the client today 8/14 next follow up is next week 8/18", "", "Aakanksha Kumari", "", "19", "52", "Yes"],
-  ["Abhay Mamgain", "01 - Refine", "Starchild Interventions", "SMB AM - starchildinterventions.com - 15 * New - GWS Gemini Enterprise Business #GE #FY26_AWT_Renewal", "3024.00", "", "", "25/8 reminder sent to sign the contract.", "", "Abhay Mamgain", "5", "12", "12", "Yes"],
-  ["Abhay Mamgain", "01 - Refine", "co2cert.com", "SMB AM - .co2cert.com - 5 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "840.00", "", "", "21/8 follow up done, waiting on customer, will close if they still don't reply", "", "API: Sales Systems Integration", "7", "19", "5", "Yes"],
-  ["Abhay Mamgain", "01 - Refine", "RevenueFit Group", "SMB AM - revenuefitgroup.com - 10 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "2520.00", "", "", "19/8 reach out, 26/8 follow up done", "", "Abhay Mamgain", "4", "15", "10", "Yes"],
-  ["Abhay Mamgain", "01 - Refine", "Hashtag JukeLife", "SMB AM - hashtagjukelife.com - 10 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "2520.00", "", "", "26/8 follow up done, waiting for reply", "", "Abhay Mamgain", "4", "15", "10", "Yes"],
-  ["Abhay Mamgain", "01 - Refine", "ATMOSPHERE PRESS, LLC", "SMB AM - atmospherepress.com- 12 * New - GWS Gemini Enterprise Business #GE #FY26_AWT_Renewal", "3024.00", "", "", "24/8 quote has been sent, 28/8 will follow up", "", "API: Sales Systems Integration", "6", "8", "12", "Yes"],
-  ["Abhay Mamgain", "01 - Refine", "Premiercare Health Services, Inc.", "SMB AM - procaremso.com - 25* New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "1050.00", "", "", "26/8 follow up done, waiting on responce", "", "Abhay Mamgain", "4", "15", "25", "Yes"],
-  ["Abhay Mamgain", "01 - Refine", "Your Preferred Printer, L.L.C.", "SMB AM - ypprint.com - 12 * New - GWS Gemini Enterprise Business#GE #FY26_AWT_Renewal", "3024.00", "2026-08-20", "20-Aug-2026", "20/8 quote sent, 27/8 follow up", "2026-08-20", "API: Sales Systems Integration", "8", "12", "12", "Yes"],
-  ["Abhay Mamgain", "01 - Refine", "Orchard Learning & Behavior Services, LLC", "SMB AM - orchardbehavior.com - 12 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "2016.00", "2026-08-17", "25-Aug-2026", "22/8 followed up with client, no reply yet", "2026-08-25", "Abhay Mamgain", "5", "15", "12", "Yes"],
-  ["Abhay Mamgain", "01 - Refine", "Onspring Technologies LLC", "SMB AM - onspring.com - 25* New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "6300.00", "", "", "21/8 followed up on the quote", "", "Abhay Mamgain", "7", "15", "25", "Yes"],
-  ["Abhay Mamgain", "01 - Refine", "SOLARA THERAPY, LIMITED", "SMB AM - solara--therapy.com - 8 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "2016.00", "", "", "26/8 followed up, will follow up on the 31/8", "", "Abhay Mamgain", "4", "15", "8", "Yes"],
-  ["Abhay Mamgain", "01 - Refine", "Nuve", "SMB AM - nuvehome.com - 25* New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "6300.00", "", "", "26/8 follow up done", "", "Abhay Mamgain", "4", "15", "25", "Yes"],
-  ["Abhay Mamgain", "01 - Refine", "Veritus Group", "SMB AM - veritusgroup.com- 12 * New - GWS Gemini Enterprise Business #GE #FY26_AWT_Renewal", "3024.00", "", "", "24/8 meeting today", "", "API: Sales Systems Integration", "", "8", "12", "Yes"],
-  ["Abhay Mamgain", "01 - Refine", "Arul, LLC", "SMB AM - arul.ai - 12 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "630.00", "", "", "21/8 sent the calendar link, will follow up on 25/8", "", "API: Sales Systems Integration", "7", "15", "15", "Yes"],
-  ["Abhay Mamgain", "01 - Refine", "Simx, Inc.", "SMB AM - simxar.com - 12 * New - GWS Gemini Enterprise Plus #GE #FY26_AWT_Renewal", "3024.00", "", "", "31/8 followed up", "", "Abhay Mamgain", "1", "12", "12", "Yes"],
-  ["Abhay Mamgain", "01 - Refine", "Innovative Building Solutions LLC", "SMB AM - ibsbuild.com- 8* New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "336.00", "", "", "19/8 Will send the quote", "", "API: Sales Systems Integration", "4", "15", "8", "Yes"],
-  ["Abhay Mamgain", "01 - Refine", "Chronos Systems Poland", "SMB AM - chronosconsulting.com - 12 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "3024.00", "", "", "20/8 quote sent, 27/8 follow up", "", "Abhay Mamgain", "7", "15", "12", "Yes"],
-  ["Abhay Mamgain", "01 - Refine", "d206tm.org", "SMB AM - d206tm.org - 7* New - GWS Gemini Enterprise Business GE #FY26_AWT_Renewal", "21.00", "", "", "21/8 meeting set", "", "API: Sales Systems Integration", "", "12", "1", "Yes"],
-  ["Abhay Mamgain", "01 - Refine", "Shr Communications, LLC", "SMB AM - shrengineering.com - 12 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "3024.00", "", "", "26/8 followed up with client, will wait for a reply", "", "Abhay Mamgain", "4", "14", "12", "Yes"],
-  ["Abhay Mamgain", "01 - Refine", "The Faithful Platform LLC", "SMB AM - faithfulplatform.com- 12 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "3024.00", "", "", "24/8 will follow up", "", "API: Sales Systems Integration", "7", "13", "12", "Yes"],
-  ["Abhay Mamgain", "01 - Refine", "Milk Moovement", "SMB AM - milkmoovement.com - 12 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "4176.00", "", "", "21/8 follow up sent, next follow up 25/8", "", "Abhay Mamgain", "7", "18", "12", "Yes"],
-  ["Abhay Mamgain", "01 - Refine", "Missourian Publishing Company", "SMB AM - emissourian.com- 12* New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "864.00", "", "", "18/8 followed up with the customer so I can send a new quote", "", "Abhay Mamgain", "5", "25", "12", "Yes"],
-  ["Abhay Mamgain", "01 - Refine", "Deetox Pllc", "SMB AM - deetox.org- 5 * New - GWS Gemini Enterprise Business #GE #FY26_AWT_Renewal", "3024.00", "", "", "24/8 Followed up with for a meeting as they wanted to schedule a call", "", "API: Sales Systems Integration", "6", "8", "12", "Yes"],
-  ["Abhay Mamgain", "01 - Refine", "Slate Dental Inc", "SMB AM - slateflosser.com - 6 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "1209.60", "", "", "31/8 sent the contract, waiting for customer to sign", "", "Abhay Mamgain", "1", "22", "6", "No"],
-  ["Abhay Mamgain", "01 - Refine", "PBG Logistics Sdn Bhd", "SMB AM - pbxlogistics.com - 25 - NEW - Gemini Enterprise Business #GE #FY26_AWT_Renewal", "3522.00", "", "", "08/14/2026 [schedule] [Owner: Jake Darnell]", "", "Jake Darnell", "", "18", "25", "Yes"],
-  ["Abhay Mamgain", "01 - Refine", "Highland Cassidy LLC", "SMB AM - highlandhomes.org - 12 * New - GWS Gemini Enterprise Business #GE #FY26_AWT_Renewal", "3024.00", "", "", "24/8 sent quote, will follow up soon", "", "API: Sales Systems Integration", "6", "8", "12", "Yes"],
-  ["Abhay Mamgain", "01 - Refine", "Valhalla Life Sciences", "SMB AM - valhallalifesciences.com- 5* New - GWS Gemini Enterprise Business #GE #FY26_AWT_Renewal", "1260.00", "", "", "25/8 sent my calendar as client wants to have a call", "", "API: Sales Systems Integration", "6", "8", "5", "Yes"],
-  ["Abhay Mamgain", "01 - Refine", "Kluge Strategic Inc.", "SMB AM - klugeinteractive.com - 12 * New - GWS Gemini Enterprise Business #GE #FY26_AWT_Renewal", "2016.00", "", "", "28/8 sent my Google calendar for a meeting", "", "API: Sales Systems Integration", "3", "5", "8", "No"],
-  ["Abhay Mamgain", "01 - Refine", "Pioneer Academics", "SMB AM - pioneeracademics.com- 12 * New - GWS Gemini Enterprise Business#GE #FY26_AWT_Renewal", "3024.00", "", "", "26/8 followed up, will follow up on the 28/8", "", "API: Sales Systems Integration", "5", "8", "12", "No"],
-  ["Abhay Mamgain", "01 - Refine", "Henderson Sothebys International Realty", "SMB AM - callawayhenderson.com - 40 * New - GWS Gemini Enterprise Business #GE #FY26_AWT_Renewal", "10080.00", "", "", "28/8 sent quote, will follow up next week", "", "API: Sales Systems Integration", "2", "4", "40", "No"],
-  ["Abhay Mamgain", "01 - Refine", "Nineteen 61, LLC", "SMB AM - nineteen61.com- 8 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "2016.00", "", "", "28/8 sent my Google calendar for a meeting", "", "API: Sales Systems Integration", "3", "5", "8", "No"],
-  ["Abhay Mamgain", "01 - Refine", "Recovery Keys Inc.", "SMB AM - recoverykeys.org - 12 * New - GWS Gemini Enterprise Standard #GE #FY26_AWT_Renewal", "3024.00", "2026-08-17", "26-Aug-2026", "26/8 follow up done, will wait for a reply", "2026-08-26", "Abhay Mamgain", "4", "15", "12", "Yes"],
-  ["Abhay Mamgain", "01 - Refine", "Compleo Physical Therapy & Wellness, LLC", "Compleo Physical Therapy & Wellness, LLC-Renewal-Gemini Enterprise-2027", "2361.60", "2026-08-22", "", "", "2026-08-22", "API: Sales Systems Integration", "", "10", "8", "No"],
-  ["Aman Dwivedi", "01 - Refine", "BrightQuery", "SMB AM - brightquery.com - #11 - NEW Gemini Enterprise Business #GE #softbundle", "2772.00", "", "", "Second follow up meet with Partner - 24/08/26", "", "Aman Dwivedi", "6", "13", "11", "Yes"],
-  ["Aman Dwivedi", "01 - Refine", "Nimblemind.ai", "SMB AM - fifthera.com - #15 - NEW Gemini Enterprise Business #GE #softbundle", "3780.00", "", "", "25/08/26 follow up done - next follow up 31/08/26", "", "Aman Dwivedi", "5", "12", "15", "Yes"],
-  ["Aman Dwivedi", "01 - Refine", "happiestbaby", "SMB AM -happiestbaby.com - #20 - NEW Gemini Enterprise Business #GE #softbundle", "2772.00", "", "", "24/08/26 sent a follow up -Next follow up 31/08/26", "", "Aman Dwivedi", "6", "13", "11", "Yes"],
-  ["Aman Dwivedi", "01 - Refine", "Axispoint, Inc.", "SMB AM - axispoint.com - #11 - NEW Gemini Enterprise Business #GE #softbundle", "2772.00", "", "", "25/08/26 follow up done - next follow up 31/08/26", "", "API: Sales Systems Integration", "5", "21", "11", "Yes"],
-  ["Aman Dwivedi", "01 - Refine", "Genesis Gaming Solutions Inc", "SMB AM - genesisgaming.com - #35 - NEW Gemini Enterprise Business #GE #softbundle", "2772.00", "", "", "25/08/26 follow up done - next follow up 31/08/26", "", "Aman Dwivedi", "5", "21", "11", "Yes"]
-];
-
-/* ─────────── State ─────────── */
-let raw = [], tableRows = [], view = "leadership";
-const charts = {};
-
-/* ─────────── Helpers ─────────── */
-const normalize = s => String(s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
-const toNum = v => parseFloat(String(v ?? "").replace(/[^0-9.\-]/g, "")) || 0;
-const money = n => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
-const fmtISO = d => d ? d.toISOString().slice(0, 10) : "";
-const monthKey = d => d ? d.toLocaleDateString("en-US", { month: "short", year: "numeric" }) : "Unassigned";
-
-const parseDate = v => {
-  if (!v) return null;
-  if (typeof v === "string" && v.startsWith("Date(")) {
-    const [y, m, d] = v.match(/-?\d+/g).map(Number);
-    return new Date(y, m, d);
-  }
-  const d = new Date(v);
-  return isNaN(d) ? null : d;
-};
-
-/* ─────────── Ingestion Pipeline ─────────── */
-function processMatrix(headers, rows) {
-  const normHeaders = headers.map(h => normalize(h));
-  const findCol = target => {
-    const normTarget = normalize(target);
-    const exact = normHeaders.indexOf(normTarget);
-    if (exact !== -1) return headers[exact];
-    const fuzzy = normHeaders.findIndex(h => h.includes(normTarget) || normTarget.includes(h));
-    return fuzzy !== -1 ? headers[fuzzy] : target;
-  };
-
-  const keyMap = {
-    date: findCol("Created Date") || findCol("Date"),
-    manager: findCol("Opportunity Owner") || findCol("Owner") || findCol("Manager"),
-    account: findCol("Account Name") || findCol("Account"),
-    revenue: findCol("Amount") || findCol("Revenue"),
-    status: findCol("Stage") || findCol("Status"),
-  };
-
-  raw = rows.map(r => {
-    const obj = {};
-    headers.forEach((h, i) => obj[h] = r[i] ?? "");
-    return {
-      ...obj,
-      _date: parseDate(obj[keyMap.date] || obj["Last Modified Date"]),
-      _revenue: toNum(obj[keyMap.revenue]),
-      _account: obj[keyMap.account] || "Unnamed Account",
-      _manager: obj[keyMap.manager] || "Unassigned",
-      _status: obj[keyMap.status] || "01 - Refine"
-    };
-  });
-
-  populateDropdowns();
-  render();
-  document.getElementById("status").textContent = `✅ ${raw.length} opportunities loaded · updated ${new Date().toLocaleTimeString()}`;
-}
-
-async function loadData() {
-  const status = document.getElementById("status");
-  status.textContent = "Connecting to Google Sheet…";
-
-  const id = CONFIG.SHEET_URL.match(/\/d\/([a-zA-Z0-9_-]+)/)?.[1];
-  if (!id) {
-    loadEmbeddedFallback("Invalid URL — loaded embedded dataset");
-    return;
-  }
-
-  const url = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:json&headers=1`;
-  try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const text = await res.text();
-    
-    // Clean GViz wrapper
-    const cleanJson = text.replace(/^.*setResponse\(|\);?$/gs, '').trim();
-    const json = JSON.parse(cleanJson);
-    if (json.status === "error") throw new Error(json.errors?.[0]?.detailed_message || "Sheet error");
-
-    let headers = json.table.cols.map(c => c.label || "");
-    let rowsRaw = json.table.rows;
-    if (headers.every(h => !h) && rowsRaw.length) {
-      headers = rowsRaw[0].c.map(c => c?.v ?? "");
-      rowsRaw = rowsRaw.slice(1);
-    }
-
-    const dataMatrix = rowsRaw.map(r => r.c.map(cell => cell?.f ?? cell?.v ?? ""));
-    processMatrix(headers, dataMatrix);
-  } catch (err) {
-    console.warn("Live fetch failed (likely private Google Sheet), loading embedded fallback:", err);
-    loadEmbeddedFallback("Private Sheet detected — loaded direct pipeline data");
-  }
-}
-
-function loadEmbeddedFallback(reason) {
-  const headers = EMBEDDED_DATA[0];
-  const rows = EMBEDDED_DATA.slice(1);
-  processMatrix(headers, rows);
-  document.getElementById("status").textContent = `ℹ️ ${reason} (${raw.length} records active)`;
-}
-
-/* ─────────── Filters & Search ─────────── */
-function populateDropdowns() {
-  const fill = (el, vals, label) => {
-    el.innerHTML = `<option value="">${label}</option>` +
-      [...new Set(vals.filter(Boolean))].sort().map(v => `<option value="${v}">${v}</option>`).join("");
-  };
-  fill(document.getElementById("managerFilter"), raw.map(r => r._manager), "All Owners");
-  fill(document.getElementById("statusFilter"),  raw.map(r => r._status),  "All Stages");
-}
-
-function setRange(days) {
-  const from = document.getElementById("dateFrom"), to = document.getElementById("dateTo");
-  const now = fmtISO(new Date());
-  if (days === "all")      { from.value = ""; to.value = ""; }
-  else if (days === "ytd") { from.value = fmtISO(new Date(new Date().getFullYear(), 0, 1)); to.value = now; }
-  else                     { from.value = fmtISO(new Date(Date.now() - days * 864e5)); to.value = now; }
-  render();
-}
-
-function getFiltered() {
-  const from = document.getElementById("dateFrom").value;
-  const to   = document.getElementById("dateTo").value;
-  const mgr  = document.getElementById("managerFilter").value;
-  const st   = document.getElementById("statusFilter").value;
-
-  return raw.filter(r => {
-    if (from && r._date && r._date < new Date(from)) return false;
-    if (to && r._date && r._date > new Date(to + "T23:59:59")) return false;
-    if (view === "manager" && mgr && r._manager !== mgr) return false;
-    if (st && r._status !== st) return false;
-    return true;
-  });
-}
-
-/* ─────────── Tabs ─────────── */
-function setTab(t) {
-  view = t;
-  const on = "rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-blue-700";
-  const off = "rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50";
-  document.getElementById("tab-leadership").className = t === "leadership" ? on : off;
-  document.getElementById("tab-manager").className = t === "manager" ? on : off;
-  document.getElementById("managerFilter").classList.toggle("hidden", t !== "manager");
-  document.getElementById("barCard").classList.toggle("hidden", t !== "leadership");
-  render();
-}
-
-/* ─────────── KPI Cards ─────────── */
-function kpiCard(label, val, delta, color, sub) {
-  return `<div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-    <p class="text-xs font-bold uppercase tracking-wider text-slate-400">${label}</p>
-    <p class="text-xl font-black mt-1 ${color || 'text-slate-900'}">${val}</p>
-    ${delta ? `<p class="text-xs mt-1 font-semibold ${delta.startsWith("▲") ? "text-emerald-600" : "text-rose-600"}">${delta}</p>` : ""}
-    ${sub ? `<p class="text-xs mt-0.5 text-slate-400 font-medium">${sub}</p>` : ""}</div>`;
-}
-
-function renderKpis(rows) {
-  const totalRev = rows.reduce((s, r) => s + r._revenue, 0);
-  const accounts = new Set(rows.map(r => r._account).filter(Boolean))
+const RAW_RECORDS = [
+  {"Opportunity Owner":"Aakanksha Kumari","Stage":"01 - Refine","Account Name":"Pied Parker, Inc.","Amount":15321.60,"Created Date":"2026-08-12","Next Step":"Sent an email on August 21; follow-up scheduled for August 29.","Age":"20","In Stale Pipeline":"Yes"},
+  {"Opportunity Owner":"Aakanksha Kumari","Stage":"01 - Refine","Account Name":"POWER AIR SYSTEM COMPANY LIMITED","Amount":4536.00,"Created Date":"2026-08-12","Next Step":"Email sent on 8/18, follow-up on 8/21.","Age":"20","In Stale Pipeline":"Yes"},
+  {"Opportunity Owner":"Aakanksha Kumari","Stage":"01 - Refine","Account Name":"FX Bridge","Amount":5376.00,"Created Date":"2026-08-12","Next Step":"Email sent on 8/21, follow-up on 8/29.","Age":"20","In Stale Pipeline":"Yes"},
+  {"Opportunity Owner":"Aakanksha Kumari","Stage":"01 - Refine","Account Name":"VIP Dinero","Amount":302.40,"Created Date":"2026-08-12","Next Step":"Sent an email on 8/21; follow-up scheduled for 8/29.","Age":"20","In Stale Pipeline":"Yes"},
+  {"Opportunity Owner":"Aakanksha Kumari","Stage":"01 - Refine","Account Name":"PREMIER DRIVING SCHOOL, INC.","Amount":403.20,"Created Date":"2026-08-12","Next Step":"Sent an email on August 21; follow-up scheduled for August 29.","Age":"20","In Stale Pipeline":"Yes"},
+  {"Opportunity Owner":"Aakanksha Kumari","Stage":"01 - Refine","Account Name":"Tapis Corporation","Amount":29232.00,"Created Date":"2026-08-12","Next Step":"Email sent on 8/21, follow-up on 8/29.","Age":"20","In Stale Pipeline":"Yes"},
+  {"Opportunity Owner":"Aakanksha Kumari","Stage":"01 - Refine","Account Name":"Floret","Amount":6249.60,"Created Date":"2026-08-12","Next Step":"Sent an email on August 21; follow-up scheduled for August 29.","Age":"20","In Stale Pipeline":"Yes"},
+  {"Opportunity Owner":"Aakanksha Kumari","Stage":"01 - Refine","Account Name":"Ivyland Counseling Center Inc.","Amount":15048.00,"Created Date":"2026-08-12","Next Step":"Sent an email on August 21; follow-up scheduled for August 29.","Age":"20","In Stale Pipeline":"Yes"},
+  {"Opportunity Owner":"Aakanksha Kumari","Stage":"01 - Refine","Account Name":"Valley Case Management & Consulting Services LLC","Amount":17160.00,"Created Date":"2026-08-12","Next Step":"Sent an email on August 21; follow-up scheduled for August 29","Age":"20","In Stale Pipeline":"Yes"},
+  {"Opportunity Owner":"Aakanksha Kumari","Stage":"01 - Refine","Account Name":"Kimmel Studio Architects","Amount":23400.00,"Created Date":"2026-08-12","Next Step":"send meeting link for 8/21,follow up scheduled for 8/29","Age":"20","In Stale Pipeline":"Yes"},
+  {"Opportunity Owner":"Aakanksha Kumari","Stage":"01 - Refine","Account Name":"Raccoon Logic Studios Inc.","Amount":13978.80,"Created Date":"2026-08-13","Next Step":"send a quotation to the customer,they have yet not decided anything","Age":"19","In Stale Pipeline":"Yes"},
+  {"Opportunity Owner":"Aakanksha Kumari","Stage":"03 - Proposal/Negotiation","Account Name":"Monkhouse Law","Amount":26208.00,"Created Date":"2026-08-14","Next Step":"Had a meeting with the client today 8/14 next follow up is next week 8/18","Age":"19","In Stale Pipeline":"Yes"},
+  {"Opportunity Owner":"Abhay Mamgain","Stage":"01 - Refine","Account Name":"Starchild Interventions","Amount":3024.00,"Created Date":"2026-08-20","Next Step":"25/8 reminder sent to sign the contract.","Age":"12","In Stale Pipeline":"Yes"},
+  {"Opportunity Owner":"Abhay Mamgain","Stage":"01 - Refine","Account Name":"co2cert.com","Amount":840.00,"Created Date":"2026-08-13","Next Step":"21/8 follow up done, waiting on customer, will close if they still don't reply","Age":"19","In Stale Pipeline":"Yes"},
+  {"Opportunity Owner":"Abhay Mamgain","Stage":"01 - Refine","Account Name":"RevenueFit Group","Amount":2520.00,"Created Date":"2026-08-17","Next Step":"19/8 reach out, 26/8 follow up done","Age":"15","In Stale Pipeline":"Yes"},
+  {"Opportunity Owner":"Abhay Mamgain","Stage":"01 - Refine","Account Name":"Hashtag JukeLife","Amount":2520.00,"Created Date":"2026-08-17","Next Step":"26/8 follow up done, waiting for reply","Age":"15","In Stale Pipeline":"Yes"},
+  {"Opportunity Owner":"Abhay Mamgain","Stage":"01 - Refine","Account Name":"ATMOSPHERE PRESS, LLC","Amount":3024.00,"Created Date":"2026-08-24","Next Step":"24/8 quote has been sent, 28/8 will follow up","Age":"8","In Stale Pipeline":"Yes"},
+  {"Opportunity Owner":"Abhay Mamgain","Stage":"01 - Refine","Account Name":"Premiercare Health Services, Inc.","Amount":1050.00,"Created Date":"2026-08-17","Next Step":"26/8 follow up done, waiting on responce","Age":"15","In Stale Pipeline":"Yes"},
+  {"Opportunity Owner":"Abhay Mamgain","Stage":"01 - Refine","Account Name":"Your Preferred Printer, L.L.C.","Amount":3024.00,"Created Date":"2026-08-20","Next Step":"20/8 quote sent, 27/8 follow up","Age":"12","In Stale Pipeline":"Yes"},
+  {"Opportunity Owner":"Abhay Mamgain","Stage":"01 - Refine","Account Name":"Orchard Learning & Behavior Services, LLC","Amount":2016.00,"Created Date":"2026-08-17","Next Step":"22/8 followed up with client, no reply
