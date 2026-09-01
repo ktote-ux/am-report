@@ -124,6 +124,11 @@
 </div>
 
 <script>
+// ==========================================
+// IMPORTANT: REPLACE THIS URL WITH YOUR NEW DEPLOYMENT URL
+// ==========================================
+const API_URL = "https://script.google.com/a/macros/google.com/s/AKfycbyOz9eRvyowOdhuGZedqQ-CuwqLhbHS8ZhOLfAWZX6fnjI9zM4Kj8JpgHGK-LASyoy8XA/exec";
+
 let DATA = [];
 let filteredData = [];
 let charts = {};
@@ -131,22 +136,32 @@ let searchTimeout;
 let sortCol = "amount";
 let sortAsc = false;
 
-function loadData(forceRefresh = false) {
+async function loadData(forceRefresh = false) {
   document.getElementById("loading").style.display = "flex";
-  google.script.run
-    .withSuccessHandler(result => {
-      DATA = result.rows || [];
-      const d = new Date(result.generatedAt);
-      document.getElementById("lastUpdated").textContent = `(Data as of: ${d.toLocaleTimeString()})`;
-      setupFilters();
-      render();
-      document.getElementById("loading").style.display = "none";
-    })
-    .withFailureHandler(error => {
-      document.getElementById("loading").style.display = "none";
-      alert("Error loading data: " + error.message);
-    })
-    .getDashboardData(forceRefresh);
+  
+  try {
+    const fetchUrl = forceRefresh ? `${API_URL}?refresh=true` : API_URL;
+    
+    const response = await fetch(fetchUrl);
+    if (!response.ok) throw new Error("Network response was not ok");
+    
+    const result = await response.json();
+    
+    if (!result || !result.rows) throw new Error("No data received from backend.");
+    
+    DATA = result.rows || [];
+    const d = new Date(result.generatedAt);
+    document.getElementById("lastUpdated").textContent = `(Data as of: ${d.toLocaleTimeString()})`;
+    
+    setupFilters();
+    render();
+    
+  } catch (error) {
+    alert("Error loading data. Check console for details.\n\n" + error.message);
+    console.error(error);
+  } finally {
+    document.getElementById("loading").style.display = "none";
+  }
 }
 
 function debounceSearch() {
@@ -161,7 +176,6 @@ function setupFilters() {
   const amSelect = document.getElementById("amFilter");
   const stageSelect = document.getElementById("stageFilter");
   
-  // Keep current selection if reloading
   const currAM = amSelect.value;
   const currStage = stageSelect.value;
 
@@ -199,7 +213,7 @@ function render() {
   });
 
   updateKPIs();
-  updateCharts();
+  try { updateCharts(); } catch(e) { console.warn("Chart generation skipped: ", e); }
   renderTable();
 }
 
@@ -217,6 +231,8 @@ function updateKPIs() {
 }
 
 function updateCharts() {
+  if (typeof Chart === 'undefined') return;
+
   const stageAmt = {}, amAmt = {}, stageCount = {}, aging = { "0–30": 0, "31–60": 0, "61–90": 0, "91–180": 0, "181+": 0 };
 
   filteredData.forEach(row => {
@@ -275,7 +291,6 @@ function renderTable() {
   
   emptyState.style.display = "none";
 
-  // Sorting logic
   const sorted = [...filteredData].sort((a, b) => {
     let valA = a[sortCol] || "";
     let valB = b[sortCol] || "";
@@ -288,7 +303,6 @@ function renderTable() {
     return 0;
   });
 
-  // DOM optimization: DocumentFragment
   const fragment = document.createDocumentFragment();
   
   sorted.forEach(row => {
