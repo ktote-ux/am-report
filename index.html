@@ -1,133 +1,939 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sales Pipeline & Accounts Dashboard</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <style>
-    *, ::before, ::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f8fafc; color: #1e293b; line-height: 1.5; }
-    .container { max-width: 1280px; margin: 0 auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
-    .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-    .btn { display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; padding: 0.4rem 0.75rem; border-radius: 0.5rem; cursor: pointer; border: 1px solid #cbd5e1; background: #fff; color: #334155; }
-    .btn:hover { background: #f1f5f9; }
-    .btn-primary { background: #2563eb; color: #fff; border-color: #2563eb; }
-    .btn-primary:hover { background: #1d4ed8; }
-    .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.7rem; }
-    .input { border: 1px solid #cbd5e1; border-radius: 0.375rem; padding: 0.35rem 0.6rem; font-size: 0.75rem; background: #fff; color: #334155; outline: none; }
-    .input:focus { border-color: #2563eb; }
-    .grid-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
-    .grid-charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap: 1.25rem; }
-    .badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 600; }
-    .badge-blue { background: #eff6ff; color: #1d4ed8; }
-    .badge-rose { background: #ffe4e6; color: #be123c; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
-    th { padding: 0.75rem 1rem; background: #f1f5f9; color: #475569; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em; cursor: pointer; user-select: none; border-bottom: 1px solid #e2e8f0; text-align: left; }
-    th:hover { background: #e2e8f0; }
-    td { padding: 0.65rem 1rem; border-bottom: 1px solid #f1f5f9; color: #334155; }
-    tr:hover td { background: #f8fafc; }
-    .truncate { max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .flex-wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Opportunity Reporting Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: Inter, Arial, sans-serif;
+        background: #f5f7fb;
+        color: #172033;
+    }
+
+    .container {
+        max-width: 1500px;
+        margin: auto;
+        padding: 24px;
+    }
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .header h1 {
+        margin: 0;
+        font-size: 28px;
+    }
+
+    .header p {
+        margin: 6px 0 0;
+        color: #6b7280;
+    }
+
+    .filters {
+        background: white;
+        padding: 18px;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,.05);
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+        margin-bottom: 22px;
+    }
+
+    label {
+        font-size: 12px;
+        color: #6b7280;
+        display: block;
+        margin-bottom: 6px;
+    }
+
+    select,
+    input {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #d9dee8;
+        border-radius: 7px;
+        background: white;
+    }
+
+    .kpis {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 16px;
+        margin-bottom: 22px;
+    }
+
+    .card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,.05);
+    }
+
+    .kpi-title {
+        color: #6b7280;
+        font-size: 13px;
+    }
+
+    .kpi-value {
+        font-size: 28px;
+        font-weight: 700;
+        margin-top: 8px;
+    }
+
+    .kpi-sub {
+        font-size: 12px;
+        color: #16a34a;
+        margin-top: 5px;
+    }
+
+    .charts {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+        margin-bottom: 22px;
+    }
+
+    .chart-card {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,.05);
+        min-height: 350px;
+    }
+
+    .chart-card h3 {
+        margin-top: 0;
+    }
+
+    .table-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,.05);
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 1100px;
+    }
+
+    th,
+    td {
+        text-align: left;
+        padding: 13px 10px;
+        border-bottom: 1px solid #edf0f5;
+        font-size: 13px;
+    }
+
+    th {
+        background: #f8fafc;
+        color: #475569;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    tr:hover {
+        background: #f8fafc;
+    }
+
+    .stage {
+        padding: 5px 9px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .prospecting {
+        background: #e0f2fe;
+        color: #0369a1;
+    }
+
+    .qualification {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .proposal {
+        background: #ede9fe;
+        color: #6d28d9;
+    }
+
+    .negotiation {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .closed {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .danger {
+        color: #dc2626;
+        font-weight: 600;
+    }
+
+    .footer {
+        text-align: center;
+        color: #94a3b8;
+        font-size: 12px;
+        margin-top: 20px;
+    }
+
+    @media(max-width: 1100px) {
+        .kpis {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .filters {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .charts {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media(max-width: 600px) {
+        .container {
+            padding: 12px;
+        }
+
+        .kpis,
+        .filters {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
 </head>
+
 <body>
 
 <div class="container">
-  <!-- ══════════ HEADER ══════════ -->
-  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-    <div>
-      <h1 style="font-size: 1.5rem; font-weight: 800; color: #0f172a;">📊 Sales Pipeline & Accounts Dashboard</h1>
-      <p id="status" style="font-size: 0.75rem; color: #64748b; margin-top: 0.2rem;">⚡ Instant load ready</p>
-    </div>
-    <div class="flex-wrap">
-      <button id="tab-leadership" onclick="setTab('leadership')" class="btn btn-primary">Leadership View</button>
-      <button id="tab-manager" onclick="setTab('manager')" class="btn">Manager View</button>
-      <button onclick="exportCSV()" class="btn">⬇ Export CSV</button>
-      <button onclick="syncLiveSheet()" class="btn">↻ Sync Live Sheet</button>
-    </div>
-  </div>
 
-  <!-- ══════════ FILTERS BAR ══════════ -->
-  <div class="card" style="padding: 0.75rem 1rem;">
-    <div class="flex-wrap" style="justify-content: space-between;">
-      <div class="flex-wrap">
-        <span style="font-size: 0.7rem; font-weight: 700; color: #94a3b8; text-transform: uppercase;">Range:</span>
-        <button onclick="setRange('all')" class="btn btn-sm">All Time</button>
-        <button onclick="setRange(30)" class="btn btn-sm">30 Days</button>
-        <button onclick="setRange(90)" class="btn btn-sm">90 Days</button>
-        <button onclick="setRange('ytd')" class="btn btn-sm">YTD</button>
-        <input type="date" id="dateFrom" onchange="render()" class="input" />
-        <span style="color: #94a3b8; font-size: 0.75rem;">→</span>
-        <input type="date" id="dateTo" onchange="render()" class="input" />
-        <select id="statusFilter" onchange="render()" class="input"><option value="">All Stages</option></select>
-        <select id="managerFilter" onchange="render()" class="input" style="display: none;"><option value="">All Owners</option></select>
-      </div>
-      <input id="search" oninput="onSearch()" placeholder="🔍 Search pipeline…" class="input" style="min-width: 220px;" />
+    <div class="header">
+        <div>
+            <h1>Opportunity Dashboard</h1>
+            <p>Sales pipeline and opportunity performance</p>
+        </div>
+        <div>
+            <strong id="lastUpdated"></strong>
+        </div>
     </div>
-  </div>
 
-  <!-- ══════════ KPI CARDS ══════════ -->
-  <div id="kpis" class="grid-kpis"></div>
+    <!-- FILTERS -->
+    <div class="filters">
 
-  <!-- ══════════ CHARTS ROW 1 ══════════ -->
-  <div class="grid-charts">
-    <div class="card" style="padding: 1rem;">
-      <h3 style="font-size: 0.875rem; font-weight: 700; margin-bottom: 0.75rem;">📈 Pipeline Revenue Over Time</h3>
-      <div style="position: relative; height: 260px;"><canvas id="lineChart"></canvas></div>
-    </div>
-    <div id="barCard" class="card" style="padding: 1rem;">
-      <h3 style="font-size: 0.875rem; font-weight: 700; margin-bottom: 0.75rem;">👤 Pipeline by Opportunity Owner</h3>
-      <div style="position: relative; height: 260px;"><canvas id="barChart"></canvas></div>
-    </div>
-  </div>
+        <div>
+            <label>Opportunity Owner</label>
+            <select id="ownerFilter">
+                <option value="">All Owners</option>
+            </select>
+        </div>
 
-  <!-- ══════════ CHARTS ROW 2 ══════════ -->
-  <div class="grid-charts">
-    <div class="card" style="padding: 1rem;">
-      <h3 style="font-size: 0.875rem; font-weight: 700; margin-bottom: 0.75rem;">📊 Opportunities by Stage</h3>
-      <div style="position: relative; height: 260px;"><canvas id="donutChart"></canvas></div>
-    </div>
-    <div class="card" style="padding: 1rem;">
-      <h3 style="font-size: 0.875rem; font-weight: 700; margin-bottom: 0.75rem;">🏢 Top 10 Accounts by Revenue</h3>
-      <div style="position: relative; height: 260px;"><canvas id="topChart"></canvas></div>
-    </div>
-  </div>
+        <div>
+            <label>Stage</label>
+            <select id="stageFilter">
+                <option value="">All Stages</option>
+            </select>
+        </div>
 
-  <!-- ══════════ DATA TABLE ══════════ -->
-  <div class="card" style="overflow: hidden;">
-    <div style="overflow-x: auto;">
-      <table>
-        <thead id="tableHead"></thead>
-        <tbody id="tableBody"></tbody>
-      </table>
+        <div>
+            <label>Created Date From</label>
+            <input type="date" id="dateFrom">
+        </div>
+
+        <div>
+            <label>Created Date To</label>
+            <input type="date" id="dateTo">
+        </div>
+
     </div>
-    <div id="tableFoot" style="padding: 0.75rem 1rem; font-size: 0.75rem; color: #94a3b8; border-top: 1px solid #f1f5f9;"></div>
-  </div>
+
+    <!-- KPI CARDS -->
+    <div class="kpis">
+
+        <div class="card">
+            <div class="kpi-title">Total Opportunities</div>
+            <div class="kpi-value" id="totalOpps">0</div>
+            <div class="kpi-sub">All opportunities</div>
+        </div>
+
+        <div class="card">
+            <div class="kpi-title">Pipeline Amount</div>
+            <div class="kpi-value" id="pipeline">$0</div>
+            <div class="kpi-sub">Total opportunity value</div>
+        </div>
+
+        <div class="card">
+            <div class="kpi-title">Average Deal Size</div>
+            <div class="kpi-value" id="avgDeal">$0</div>
+            <div class="kpi-sub">Average opportunity amount</div>
+        </div>
+
+        <div class="card">
+            <div class="kpi-title">Opportunity Quantity</div>
+            <div class="kpi-value" id="totalQty">0</div>
+            <div class="kpi-sub">Total quantity</div>
+        </div>
+
+        <div class="card">
+            <div class="kpi-title">Average Age</div>
+            <div class="kpi-value" id="avgAge">0</div>
+            <div class="kpi-sub">Days</div>
+        </div>
+
+    </div>
+
+    <!-- CHARTS -->
+    <div class="charts">
+
+        <div class="chart-card">
+            <h3>Pipeline by Stage</h3>
+            <canvas id="stageChart"></canvas>
+        </div>
+
+        <div class="chart-card">
+            <h3>Pipeline by Opportunity Owner</h3>
+            <canvas id="ownerChart"></canvas>
+        </div>
+
+        <div class="chart-card">
+            <h3>Opportunities by Stage</h3>
+            <canvas id="stageCountChart"></canvas>
+        </div>
+
+        <div class="chart-card">
+            <h3>Opportunity Aging</h3>
+            <canvas id="ageChart"></canvas>
+        </div>
+
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-card">
+
+        <h3>Opportunity Details</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Owner</th>
+                    <th>Stage</th>
+                    <th>Account Name</th>
+                    <th>Opportunity Name</th>
+                    <th>Amount</th>
+                    <th>Created Date</th>
+                    <th>Last Activity</th>
+                    <th>Age</th>
+                    <th>Quantity</th>
+                    <th>Next Step</th>
+                    <th>Last Modified Date</th>
+                    <th>Last Modified By</th>
+                </tr>
+            </thead>
+
+            <tbody id="opportunityTable"></tbody>
+        </table>
+
+    </div>
+
+    <div class="footer">
+        Opportunity Reporting Dashboard
+    </div>
+
 </div>
 
+
 <script>
-/* ═══════════════════════════════════════════════════════════════
-   PRE-LOADED PIPELINE RECORDS
-   ═══════════════════════════════════════════════════════════════ */
-const RAW_RECORDS = [
-  {"Opportunity Owner":"Aakanksha Kumari","Stage":"01 - Refine","Account Name":"Pied Parker, Inc.","Amount":15321.60,"Created Date":"2026-08-12","Next Step":"Sent an email on August 21; follow-up scheduled for August 29.","Age":"20","In Stale Pipeline":"Yes"},
-  {"Opportunity Owner":"Aakanksha Kumari","Stage":"01 - Refine","Account Name":"POWER AIR SYSTEM COMPANY LIMITED","Amount":4536.00,"Created Date":"2026-08-12","Next Step":"Email sent on 8/18, follow-up on 8/21.","Age":"20","In Stale Pipeline":"Yes"},
-  {"Opportunity Owner":"Aakanksha Kumari","Stage":"01 - Refine","Account Name":"FX Bridge","Amount":5376.00,"Created Date":"2026-08-12","Next Step":"Email sent on 8/21, follow-up on 8/29.","Age":"20","In Stale Pipeline":"Yes"},
-  {"Opportunity Owner":"Aakanksha Kumari","Stage":"01 - Refine","Account Name":"VIP Dinero","Amount":302.40,"Created Date":"2026-08-12","Next Step":"Sent an email on 8/21; follow-up scheduled for 8/29.","Age":"20","In Stale Pipeline":"Yes"},
-  {"Opportunity Owner":"Aakanksha Kumari","Stage":"01 - Refine","Account Name":"PREMIER DRIVING SCHOOL, INC.","Amount":403.20,"Created Date":"2026-08-12","Next Step":"Sent an email on August 21; follow-up scheduled for August 29.","Age":"20","In Stale Pipeline":"Yes"},
-  {"Opportunity Owner":"Aakanksha Kumari","Stage":"01 - Refine","Account Name":"Tapis Corporation","Amount":29232.00,"Created Date":"2026-08-12","Next Step":"Email sent on 8/21, follow-up on 8/29.","Age":"20","In Stale Pipeline":"Yes"},
-  {"Opportunity Owner":"Aakanksha Kumari","Stage":"01 - Refine","Account Name":"Floret","Amount":6249.60,"Created Date":"2026-08-12","Next Step":"Sent an email on August 21; follow-up scheduled for August 29.","Age":"20","In Stale Pipeline":"Yes"},
-  {"Opportunity Owner":"Aakanksha Kumari","Stage":"01 - Refine","Account Name":"Ivyland Counseling Center Inc.","Amount":15048.00,"Created Date":"2026-08-12","Next Step":"Sent an email on August 21; follow-up scheduled for August 29.","Age":"20","In Stale Pipeline":"Yes"},
-  {"Opportunity Owner":"Aakanksha Kumari","Stage":"01 - Refine","Account Name":"Valley Case Management & Consulting Services LLC","Amount":17160.00,"Created Date":"2026-08-12","Next Step":"Sent an email on August 21; follow-up scheduled for August 29","Age":"20","In Stale Pipeline":"Yes"},
-  {"Opportunity Owner":"Aakanksha Kumari","Stage":"01 - Refine","Account Name":"Kimmel Studio Architects","Amount":23400.00,"Created Date":"2026-08-12","Next Step":"send meeting link for 8/21,follow up scheduled for 8/29","Age":"20","In Stale Pipeline":"Yes"},
-  {"Opportunity Owner":"Aakanksha Kumari","Stage":"01 - Refine","Account Name":"Raccoon Logic Studios Inc.","Amount":13978.80,"Created Date":"2026-08-13","Next Step":"send a quotation to the customer,they have yet not decided anything","Age":"19","In Stale Pipeline":"Yes"},
-  {"Opportunity Owner":"Aakanksha Kumari","Stage":"03 - Proposal/Negotiation","Account Name":"Monkhouse Law","Amount":26208.00,"Created Date":"2026-08-14","Next Step":"Had a meeting with the client today 8/14 next follow up is next week 8/18","Age":"19","In Stale Pipeline":"Yes"},
-  {"Opportunity Owner":"Abhay Mamgain","Stage":"01 - Refine","Account Name":"Starchild Interventions","Amount":3024.00,"Created Date":"2026-08-20","Next Step":"25/8 reminder sent to sign the contract.","Age":"12","In Stale Pipeline":"Yes"},
-  {"Opportunity Owner":"Abhay Mamgain","Stage":"01 - Refine","Account Name":"co2cert.com","Amount":840.00,"Created Date":"2026-08-13","Next Step":"21/8 follow up done, waiting on customer, will close if they still don't reply","Age":"19","In Stale Pipeline":"Yes"},
-  {"Opportunity Owner":"Abhay Mamgain","Stage":"01 - Refine","Account Name":"RevenueFit Group","Amount":2520.00,"Created Date":"2026-08-17","Next Step":"19/8 reach out, 26/8 follow up done","Age":"15","In Stale Pipeline":"Yes"},
-  {"Opportunity Owner":"Abhay Mamgain","Stage":"01 - Refine","Account Name":"Hashtag JukeLife","Amount":2520.00,"Created Date":"2026-08-17","Next Step":"26/8 follow up done, waiting for reply","Age":"15","In Stale Pipeline":"Yes"},
-  {"Opportunity Owner":"Abhay Mamgain","Stage":"01 - Refine","Account Name":"ATMOSPHERE PRESS, LLC","Amount":3024.00,"Created Date":"2026-08-24","Next Step":"24/8 quote has been sent, 28/8 will follow up","Age":"8","In Stale Pipeline":"Yes"},
-  {"Opportunity Owner":"Abhay Mamgain","Stage":"01 - Refine","Account Name":"Premiercare Health Services, Inc.","Amount":1050.00,"Created Date":"2026-08-17","Next Step":"26/8 follow up done, waiting on responce","Age":"15","In Stale Pipeline":"Yes"},
-  {"Opportunity Owner":"Abhay Mamgain","Stage":"01 - Refine","Account Name":"Your Preferred Printer, L.L.C.","Amount":3024.00,"Created Date":"2026-08-20","Next Step":"20/8 quote sent, 27/8 follow up","Age":"12","In Stale Pipeline":"Yes"},
-  {"Opportunity Owner":"Abhay Mamgain","Stage":"01 - Refine","Account Name":"Orchard Learning & Behavior Services, LLC","Amount":2016.00,"Created Date":"2026-08-17","Next Step":"22/8 followed up with client, no reply
+
+/*
+====================================================
+1. YOUR DATA
+====================================================
+
+Replace this sample array with your Google Sheet data.
+
+Each object represents one row from your sheet.
+*/
+
+let data = [
+
+    {
+        owner: "John Smith",
+        stage: "Prospecting",
+        account: "ABC Corporation",
+        opportunity: "ABC Expansion",
+        amount: 50000,
+        created: "2026-01-10",
+        activity: "2026-08-25",
+        age: 235,
+        quantity: 10,
+        nextStep: "Schedule demo",
+        modified: "2026-08-28",
+        modifiedBy: "John Smith"
+    },
+
+    {
+        owner: "Sarah Johnson",
+        stage: "Qualification",
+        account: "XYZ Ltd",
+        opportunity: "XYZ Enterprise Deal",
+        amount: 125000,
+        created: "2026-03-15",
+        activity: "2026-08-20",
+        age: 171,
+        quantity: 25,
+        nextStep: "Send proposal",
+        modified: "2026-08-29",
+        modifiedBy: "Sarah Johnson"
+    },
+
+    {
+        owner: "John Smith",
+        stage: "Proposal",
+        account: "Acme Inc",
+        opportunity: "Acme Software",
+        amount: 85000,
+        created: "2026-05-02",
+        activity: "2026-08-30",
+        age: 123,
+        quantity: 15,
+        nextStep: "Commercial discussion",
+        modified: "2026-08-30",
+        modifiedBy: "John Smith"
+    },
+
+    {
+        owner: "Mike Brown",
+        stage: "Negotiation",
+        account: "Global Tech",
+        opportunity: "Global Tech Upgrade",
+        amount: 200000,
+        created: "2026-02-12",
+        activity: "2026-08-27",
+        age: 202,
+        quantity: 40,
+        nextStep: "Final negotiation",
+        modified: "2026-08-31",
+        modifiedBy: "Mike Brown"
+    },
+
+    {
+        owner: "Sarah Johnson",
+        stage: "Closed Won",
+        account: "Delta Systems",
+        opportunity: "Delta Annual Contract",
+        amount: 175000,
+        created: "2026-04-01",
+        activity: "2026-08-29",
+        age: 154,
+        quantity: 30,
+        nextStep: "Contract signed",
+        modified: "2026-08-29",
+        modifiedBy: "Sarah Johnson"
+    }
+
+];
+
+
+/*
+====================================================
+2. FORMATTERS
+====================================================
+*/
+
+function currency(value) {
+    return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0
+    }).format(value);
+}
+
+
+/*
+====================================================
+3. FILTER OPTIONS
+====================================================
+*/
+
+function populateFilters() {
+
+    const owners = [...new Set(data.map(x => x.owner))].sort();
+    const stages = [...new Set(data.map(x => x.stage))].sort();
+
+    const ownerSelect = document.getElementById("ownerFilter");
+    const stageSelect = document.getElementById("stageFilter");
+
+    owners.forEach(owner => {
+        const option = document.createElement("option");
+        option.value = owner;
+        option.textContent = owner;
+        ownerSelect.appendChild(option);
+    });
+
+    stages.forEach(stage => {
+        const option = document.createElement("option");
+        option.value = stage;
+        option.textContent = stage;
+        stageSelect.appendChild(option);
+    });
+}
+
+
+/*
+====================================================
+4. FILTER DATA
+====================================================
+*/
+
+function getFilteredData() {
+
+    const owner = document.getElementById("ownerFilter").value;
+    const stage = document.getElementById("stageFilter").value;
+    const dateFrom = document.getElementById("dateFrom").value;
+    const dateTo = document.getElementById("dateTo").value;
+
+    return data.filter(row => {
+
+        if (owner && row.owner !== owner)
+            return false;
+
+        if (stage && row.stage !== stage)
+            return false;
+
+        if (dateFrom && row.created < dateFrom)
+            return false;
+
+        if (dateTo && row.created > dateTo)
+            return false;
+
+        return true;
+    });
+}
+
+
+/*
+====================================================
+5. KPI CALCULATIONS
+====================================================
+*/
+
+function updateKPIs(rows) {
+
+    const totalOpps = rows.length;
+
+    const pipeline = rows.reduce(
+        (sum, row) => sum + Number(row.amount || 0),
+        0
+    );
+
+    const quantity = rows.reduce(
+        (sum, row) => sum + Number(row.quantity || 0),
+        0
+    );
+
+    const avgDeal =
+        totalOpps > 0 ? pipeline / totalOpps : 0;
+
+    const avgAge =
+        totalOpps > 0
+        ? rows.reduce((sum, row) => sum + Number(row.age || 0), 0) / totalOpps
+        : 0;
+
+    document.getElementById("totalOpps").textContent =
+        totalOpps.toLocaleString();
+
+    document.getElementById("pipeline").textContent =
+        currency(pipeline);
+
+    document.getElementById("avgDeal").textContent =
+        currency(avgDeal);
+
+    document.getElementById("totalQty").textContent =
+        quantity.toLocaleString();
+
+    document.getElementById("avgAge").textContent =
+        Math.round(avgAge) + " days";
+}
+
+
+/*
+====================================================
+6. TABLE
+====================================================
+*/
+
+function updateTable(rows) {
+
+    const table = document.getElementById("opportunityTable");
+
+    table.innerHTML = "";
+
+    rows.forEach(row => {
+
+        const tr = document.createElement("tr");
+
+        let stageClass =
+            row.stage.toLowerCase()
+                .replace(" ", "")
+                .replace("closedwon", "closed");
+
+        const ageClass =
+            row.age > 180 ? "danger" : "";
+
+        tr.innerHTML = `
+            <td>${row.owner}</td>
+
+            <td>
+                <span class="stage ${stageClass}">
+                    ${row.stage}
+                </span>
+            </td>
+
+            <td>${row.account}</td>
+
+            <td><strong>${row.opportunity}</strong></td>
+
+            <td>${currency(row.amount)}</td>
+
+            <td>${row.created}</td>
+
+            <td>${row.activity}</td>
+
+            <td class="${ageClass}">
+                ${row.age} days
+            </td>
+
+            <td>${row.quantity}</td>
+
+            <td>${row.nextStep}</td>
+
+            <td>${row.modified}</td>
+
+            <td>${row.modifiedBy}</td>
+        `;
+
+        table.appendChild(tr);
+    });
+}
+
+
+/*
+====================================================
+7. CHARTS
+====================================================
+*/
+
+let stageChart;
+let ownerChart;
+let stageCountChart;
+let ageChart;
+
+
+function updateCharts(rows) {
+
+    /*
+    Pipeline by Stage
+    */
+
+    const stageAmounts = {};
+
+    rows.forEach(row => {
+
+        if (!stageAmounts[row.stage])
+            stageAmounts[row.stage] = 0;
+
+        stageAmounts[row.stage] += Number(row.amount || 0);
+    });
+
+
+    /*
+    Pipeline by Owner
+    */
+
+    const ownerAmounts = {};
+
+    rows.forEach(row => {
+
+        if (!ownerAmounts[row.owner])
+            ownerAmounts[row.owner] = 0;
+
+        ownerAmounts[row.owner] += Number(row.amount || 0);
+    });
+
+
+    /*
+    Opportunity count by Stage
+    */
+
+    const stageCounts = {};
+
+    rows.forEach(row => {
+
+        if (!stageCounts[row.stage])
+            stageCounts[row.stage] = 0;
+
+        stageCounts[row.stage]++;
+    });
+
+
+    /*
+    Aging buckets
+    */
+
+    const aging = {
+        "0-30 Days": 0,
+        "31-60 Days": 0,
+        "61-90 Days": 0,
+        "91-180 Days": 0,
+        "181+ Days": 0
+    };
+
+    rows.forEach(row => {
+
+        const age = Number(row.age);
+
+        if (age <= 30)
+            aging["0-30 Days"]++;
+
+        else if (age <= 60)
+            aging["31-60 Days"]++;
+
+        else if (age <= 90)
+            aging["61-90 Days"]++;
+
+        else if (age <= 180)
+            aging["91-180 Days"]++;
+
+        else
+            aging["181+ Days"]++;
+    });
+
+
+    /*
+    Destroy old charts
+    */
+
+    if (stageChart) stageChart.destroy();
+    if (ownerChart) ownerChart.destroy();
+    if (stageCountChart) stageCountChart.destroy();
+    if (ageChart) ageChart.destroy();
+
+
+    /*
+    Stage amount chart
+    */
+
+    stageChart = new Chart(
+        document.getElementById("stageChart"),
+        {
+            type: "bar",
+
+            data: {
+                labels: Object.keys(stageAmounts),
+
+                datasets: [{
+                    label: "Pipeline Amount",
+                    data: Object.values(stageAmounts),
+                    backgroundColor: "#4f46e5",
+                    borderRadius: 6
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        }
+    );
+
+
+    /*
+    Owner chart
+    */
+
+    ownerChart = new Chart(
+        document.getElementById("ownerChart"),
+        {
+            type: "bar",
+
+            data: {
+                labels: Object.keys(ownerAmounts),
+
+                datasets: [{
+                    label: "Pipeline",
+                    data: Object.values(ownerAmounts),
+                    backgroundColor: "#0891b2",
+                    borderRadius: 6
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        }
+    );
+
+
+    /*
+    Stage count chart
+    */
+
+    stageCountChart = new Chart(
+        document.getElementById("stageCountChart"),
+        {
+            type: "doughnut",
+
+            data: {
+                labels: Object.keys(stageCounts),
+
+                datasets: [{
+                    data: Object.values(stageCounts),
+
+                    backgroundColor: [
+                        "#38bdf8",
+                        "#f59e0b",
+                        "#8b5cf6",
+                        "#22c55e",
+                        "#3b82f6"
+                    ]
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        }
+    );
+
+
+    /*
+    Aging chart
+    */
+
+    ageChart = new Chart(
+        document.getElementById("ageChart"),
+        {
+            type: "bar",
+
+            data: {
+                labels: Object.keys(aging),
+
+                datasets: [{
+                    label: "Opportunities",
+                    data: Object.values(aging),
+                    backgroundColor: [
+                        "#22c55e",
+                        "#84cc16",
+                        "#facc15",
+                        "#f97316",
+                        "#ef4444"
+                    ],
+                    borderRadius: 6
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        }
+    );
+}
+
+
+/*
+====================================================
+8. REFRESH DASHBOARD
+====================================================
+*/
+
+function refreshDashboard() {
+
+    const rows = getFilteredData();
+
+    updateKPIs(rows);
+    updateTable(rows);
+    updateCharts(rows);
+
+    document.getElementById("lastUpdated").textContent =
+        "Updated: " + new Date().toLocaleString();
+}
+
+
+/*
+====================================================
+9. FILTER EVENTS
+====================================================
+*/
+
+document.getElementById("ownerFilter")
+    .addEventListener("change", refreshDashboard);
+
+document.getElementById("stageFilter")
+    .addEventListener("change", refreshDashboard);
+
+document.getElementById("dateFrom")
+    .addEventListener("change", refreshDashboard);
+
+document.getElementById("dateTo")
+    .addEventListener("change", refreshDashboard);
+
+
+/*
+====================================================
+10. START DASHBOARD
+====================================================
+*/
+
+populateFilters();
+refreshDashboard();
+
+</script>
+
+</body>
+</html>
