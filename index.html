@@ -3,31 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Accounts Dashboard</title>
+  <title>Accounts & Pipeline Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body class="min-h-screen bg-gray-50">
-
 <div class="mx-auto max-w-7xl space-y-5 p-6">
 
   <!-- ══════════ HEADER ══════════ -->
   <div class="flex flex-wrap items-center justify-between gap-4">
     <div>
-      <h1 class="text-2xl font-bold">📊 Accounts Dashboard</h1>
-      <p id="status" class="text-sm text-gray-500">Loading data…</p>
+      <h1 class="text-2xl font-bold text-gray-900">📊 Accounts & Pipeline Dashboard</h1>
+      <p id="status" class="text-sm text-gray-500">Loading pipeline data…</p>
     </div>
     <div class="flex flex-wrap gap-2">
-      <button id="tab-leadership" onclick="setTab('leadership')" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white">Leadership</button>
-      <button id="tab-manager" onclick="setTab('manager')" class="rounded-lg border bg-white px-4 py-2 text-sm font-medium hover:bg-gray-50">Manager View</button>
-      <button onclick="exportCSV()" class="rounded-lg border bg-white px-4 py-2 text-sm hover:bg-gray-50">⬇ Export CSV</button>
-      <button onclick="loadData()" class="rounded-lg border bg-white px-4 py-2 text-sm hover:bg-gray-50">↻ Refresh</button>
+      <button id="tab-leadership" onclick="setTab('leadership')" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm">Leadership View</button>
+      <button id="tab-manager" onclick="setTab('manager')" class="rounded-lg border bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 shadow-sm">Manager View</button>
+      <button onclick="exportCSV()" class="rounded-lg border bg-white px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 shadow-sm">⬇ Export CSV</button>
+      <button onclick="loadData()" class="rounded-lg border bg-white px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 shadow-sm">↻ Refresh</button>
     </div>
   </div>
 
   <!-- ══════════ FILTERS ══════════ -->
   <div class="flex flex-wrap items-center gap-2 rounded-xl border bg-white p-3 shadow-sm">
-    <span class="text-xs font-semibold uppercase text-gray-400">Range:</span>
+    <span class="text-xs font-semibold uppercase text-gray-400">Date Range:</span>
     <button onclick="setRange('all')"  class="rounded-md border px-2.5 py-1 text-xs hover:bg-gray-50">All Time</button>
     <button onclick="setRange(30)"     class="rounded-md border px-2.5 py-1 text-xs hover:bg-gray-50">30 Days</button>
     <button onclick="setRange(90)"     class="rounded-md border px-2.5 py-1 text-xs hover:bg-gray-50">90 Days</button>
@@ -35,9 +34,9 @@
     <input type="date" id="dateFrom" onchange="render()" class="rounded-md border px-2 py-1 text-xs" />
     <span class="text-xs text-gray-400">→</span>
     <input type="date" id="dateTo" onchange="render()" class="rounded-md border px-2 py-1 text-xs" />
-    <select id="statusFilter" onchange="render()" class="rounded-md border px-2 py-1 text-xs"><option value="">All statuses</option></select>
-    <select id="managerFilter" onchange="render()" class="hidden rounded-md border px-2 py-1 text-xs"><option value="">All managers</option></select>
-    <input id="search" oninput="onSearch()" placeholder="🔍 Search table…" class="ml-auto rounded-md border px-3 py-1.5 text-xs w-48" />
+    <select id="statusFilter" onchange="render()" class="rounded-md border px-2 py-1 text-xs"><option value="">All Stages</option></select>
+    <select id="managerFilter" onchange="render()" class="hidden rounded-md border px-2 py-1 text-xs"><option value="">All Owners</option></select>
+    <input id="search" oninput="onSearch()" placeholder="🔍 Search pipeline…" class="ml-auto rounded-md border px-3 py-1.5 text-xs w-48" />
   </div>
 
   <!-- ══════════ KPI CARDS ══════════ -->
@@ -46,11 +45,11 @@
   <!-- ══════════ CHARTS ROW 1 ══════════ -->
   <div class="grid gap-5 lg:grid-cols-2">
     <div class="rounded-xl border bg-white p-4 shadow-sm">
-      <h2 class="mb-3 font-semibold">Revenue Over Time</h2>
+      <h2 class="mb-3 font-semibold text-gray-800">Pipeline Revenue Over Time</h2>
       <div class="relative h-64"><canvas id="lineChart"></canvas></div>
     </div>
     <div id="barCard" class="rounded-xl border bg-white p-4 shadow-sm">
-      <h2 class="mb-3 font-semibold">Revenue by Account Manager</h2>
+      <h2 class="mb-3 font-semibold text-gray-800">Revenue by Opportunity Owner</h2>
       <div class="relative h-64"><canvas id="barChart"></canvas></div>
     </div>
   </div>
@@ -58,11 +57,11 @@
   <!-- ══════════ CHARTS ROW 2 ══════════ -->
   <div class="grid gap-5 lg:grid-cols-2">
     <div class="rounded-xl border bg-white p-4 shadow-sm">
-      <h2 class="mb-3 font-semibold">Accounts by Status</h2>
+      <h2 class="mb-3 font-semibold text-gray-800">Opportunities by Stage</h2>
       <div class="relative h-64"><canvas id="donutChart"></canvas></div>
     </div>
     <div class="rounded-xl border bg-white p-4 shadow-sm">
-      <h2 class="mb-3 font-semibold">Top 10 Accounts by Revenue</h2>
+      <h2 class="mb-3 font-semibold text-gray-800">Top 10 Accounts by Revenue</h2>
       <div class="relative h-64"><canvas id="topChart"></canvas></div>
     </div>
   </div>
@@ -70,25 +69,26 @@
   <!-- ══════════ DATA TABLE ══════════ -->
   <div class="overflow-x-auto rounded-xl border bg-white shadow-sm">
     <table class="w-full text-sm">
-      <thead id="tableHead" class="bg-gray-50 text-left"></thead>
-      <tbody id="tableBody"></tbody>
+      <thead id="tableHead" class="bg-gray-50 text-left text-gray-600"></thead>
+      <tbody id="tableBody" class="divide-y divide-gray-100"></tbody>
     </table>
     <p id="tableFoot" class="border-t px-4 py-2 text-xs text-gray-400"></p>
   </div>
+
 </div>
 
 <script>
 /* ═══════════════════════════════════════════════════════════════
-   🔴 STEP 1 — PASTE YOUR FULL GOOGLE SHEET LINK BETWEEN THE QUOTES
+   PRE-POPULATED PIPELINE CONFIGURATION
    ═══════════════════════════════════════════════════════════════ */
 const CONFIG = {
-  SHEET_URL: "PASTE_YOUR_GOOGLE_SHEET_LINK_HERE",   // ← 🔴 HERE 🔴
-  COLS: {                    // ⚙️ STEP 2 — match your sheet headers EXACTLY
-    date:    "Date",
-    manager: "Account Manager",
-    account: "Account",
-    revenue: "Revenue",
-    status:  "Status",
+  SHEET_URL: "https://docs.google.com/spreadsheets/d/1I696sG9CTFIfBgSeDo0gsxfgFjg_eN2skPSNQgGXqvo/edit",
+  COLS: {
+    date:    "Created Date",
+    manager: "Opportunity Owner",
+    account: "Account Name",
+    revenue: "Amount",
+    status:  "Stage",
   },
   REFRESH_MINUTES: 5,
 };
@@ -97,16 +97,17 @@ const CONFIG = {
 let raw = [], tableRows = [], view = "leadership";
 const charts = {};
 
-/* ─────────── Load & clean data ─────────── */
+/* ─────────── Load & Clean Data ─────────── */
 const parseDate = v => {
   if (!v) return null;
   if (typeof v === "string" && v.startsWith("Date(")) {
-    const [y,m,d] = v.match(/-?\d+/g).map(Number);
+    const [y, m, d] = v.match(/-?\d+/g).map(Number);
     return new Date(y, m, d);
   }
   const d = new Date(v);
   return isNaN(d) ? null : d;
 };
+
 const toNum = v => parseFloat(String(v ?? "").replace(/[^0-9.\-]/g, "")) || 0;
 const money = n => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 const fmtISO = d => d.toISOString().slice(0, 10);
@@ -114,10 +115,10 @@ const monthKey = d => d.toLocaleDateString("en-US", { month: "short", year: "num
 
 async function loadData() {
   const status = document.getElementById("status");
-  status.textContent = "Loading data…";
-  const id = CONFIG.SHEET_URL.match(/\/d\/([a-zA-Z0-9_-]+)/)?.[1];
+  status.textContent = "Loading pipeline data…";
+  const id = CONFIG.SHEET_URL.match(/\/d\/([a-zA-Z0-9_-]+)/)?.;
   if (!id) {
-    status.innerHTML = `❌ No sheet link found. Paste your Google Sheet URL into <code class="bg-gray-100 px-1">CONFIG.SHEET_URL</code> at the top of the script.`;
+    status.innerHTML = `❌ No valid sheet ID found in <code class="bg-gray-100 px-1">CONFIG.SHEET_URL</code>.`;
     return;
   }
   const url = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:json&headers=1`;
@@ -128,10 +129,11 @@ async function loadData() {
 
     let headers = json.table.cols.map(c => c.label || "");
     let rowsRaw = json.table.rows;
-    if (headers.every(h => !h) && rowsRaw.length) {   // fallback: first row = headers
+    if (headers.every(h => !h) && rowsRaw.length) {
       headers = rowsRaw[0].c.map(c => c?.v ?? "");
       rowsRaw = rowsRaw.slice(1);
     }
+
     raw = rowsRaw.map(r => {
       const row = {};
       headers.forEach((h, i) => row[h] = r.c?.[i]?.f ?? r.c?.[i]?.v ?? "");
@@ -140,9 +142,9 @@ async function loadData() {
 
     populateDropdowns();
     render();
-    status.textContent = `✅ ${raw.length} rows loaded · updated ${new Date().toLocaleTimeString()}`;
+    status.textContent = `✅ ${raw.length} opportunities loaded · updated ${new Date().toLocaleTimeString()}`;
   } catch (e) {
-    status.innerHTML = `❌ Could not load data. Check: 1) the link is a <b>Google Sheet</b> (not Excel/CSV) 2) sharing is set to <b>Anyone with link → Viewer</b><br><span class="text-xs text-gray-400">${e.message}</span>`;
+    status.innerHTML = `❌ Could not load sheet data.<br><span class="text-xs text-gray-500">${e.message}</span>`;
   }
 }
 
@@ -151,10 +153,10 @@ function populateDropdowns() {
   const C = CONFIG.COLS;
   const fill = (el, vals, label) => {
     el.innerHTML = `<option value="">${label}</option>` +
-      [...new Set(vals)].sort().map(v => `<option>${v}</option>`).join("");
+      [...new Set(vals.filter(Boolean))].sort().map(v => `<option>${v}</option>`).join("");
   };
-  fill(document.getElementById("managerFilter"), raw.map(r => r[C.manager]), "All managers");
-  fill(document.getElementById("statusFilter"),  raw.map(r => r[C.status]),  "All statuses");
+  fill(document.getElementById("managerFilter"), raw.map(r => r[C.manager]), "All Owners");
+  fill(document.getElementById("statusFilter"),  raw.map(r => r[C.status]),  "All Stages");
 }
 
 function setRange(days) {
@@ -184,8 +186,8 @@ function getFiltered() {
 /* ─────────── Tabs ─────────── */
 function setTab(t) {
   view = t;
-  const on = "rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white";
-  const off = "rounded-lg border bg-white px-4 py-2 text-sm font-medium hover:bg-gray-50";
+  const on = "rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm";
+  const off = "rounded-lg border bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 shadow-sm";
   document.getElementById("tab-leadership").className = t === "leadership" ? on : off;
   document.getElementById("tab-manager").className = t === "manager" ? on : off;
   document.getElementById("managerFilter").classList.toggle("hidden", t !== "manager");
@@ -203,38 +205,36 @@ function groupMonthly(rows) {
   return [...m.entries()].sort((a, b) => a[0] - b[0]).map(([t, rev]) => ({ date: new Date(t), revenue: rev }));
 }
 
-/* ─────────── KPI cards ─────────── */
+/* ─────────── KPI Cards ─────────── */
 function kpiCard(label, val, delta, color, sub) {
   return `<div class="rounded-xl border bg-white p-4 shadow-sm">
-    <p class="text-xs text-gray-500">${label}</p>
-    <p class="text-xl font-semibold ${color || ""}">${val}</p>
-    ${delta ? `<p class="text-xs ${delta.startsWith("▲") ? "text-green-600" : "text-red-600"}">${delta} vs prior month</p>` : ""}
-    ${sub ? `<p class="text-xs text-gray-400">${sub}</p>` : ""}</div>`;
+    <p class="text-xs font-medium text-gray-500">${label}</p>
+    <p class="text-xl font-bold mt-1 ${color || 'text-gray-900'}">${val}</p>
+    ${delta ? `<p class="text-xs mt-1 ${delta.startsWith("▲") ? "text-green-600" : "text-red-600"} font-medium">${delta} vs prior mo.</p>` : ""}
+    ${sub ? `<p class="text-xs mt-1 text-gray-400">${sub}</p>` : ""}</div>`;
 }
 
 function renderKpis(rows) {
   const C = CONFIG.COLS;
   const revenue = rows.reduce((s, r) => s + r._revenue, 0);
   const accounts = new Set(rows.map(r => r[C.account]).filter(Boolean));
-  const active = new Set(rows.filter(r => String(r[C.status]).toLowerCase() === "active").map(r => r[C.account]));
+  const active = new Set(rows.filter(r => !String(r[C.status]).toLowerCase().includes("lost") && !String(r[C.status]).toLowerCase().includes("closed")).map(r => r[C.account]));
   const avg = accounts.size ? revenue / accounts.size : 0;
-
   const monthly = groupMonthly(rows);
   const cur = monthly.at(-1)?.revenue ?? 0, prev = monthly.at(-2)?.revenue ?? 0;
   const mom = prev ? (cur - prev) / prev * 100 : null;
   const momStr = mom === null ? "—" : `${mom >= 0 ? "▲" : "▼"} ${mom >= 0 ? "+" : ""}${mom.toFixed(1)}%`;
-
   const byMgr = new Map();
   rows.forEach(r => { if (r[C.manager]) byMgr.set(r[C.manager], (byMgr.get(r[C.manager]) || 0) + r._revenue); });
-  const top = [...byMgr.entries()].sort((a, b) => b[1] - a[1])[0];
+  const top = [...byMgr.entries()].sort((a, b) => b - a)[0];
 
   document.getElementById("kpis").innerHTML =
-    kpiCard("Total Revenue", money(revenue), momStr) +
-    kpiCard("Accounts", accounts.size) +
+    kpiCard("Total Pipeline Value", money(revenue), momStr) +
+    kpiCard("Total Accounts", accounts.size) +
     kpiCard("Active Accounts", active.size) +
-    kpiCard("Avg Revenue / Account", money(avg)) +
-    kpiCard("MoM Growth", mom === null ? "—" : `${mom >= 0 ? "+" : ""}${mom.toFixed(1)}%`, null, mom === null ? "" : (mom >= 0 ? "text-green-600" : "text-red-600")) +
-    kpiCard("Top Manager", top ? top[0] : "—", null, "", top ? money(top[1]) : "");
+    kpiCard("Avg Deal / Account", money(avg)) +
+    kpiCard("MoM Pipeline Growth", mom === null ? "—" : `${mom >= 0 ? "+" : ""}${mom.toFixed(1)}%`, null, mom === null ? "" : (mom >= 0 ? "text-green-600" : "text-red-600")) +
+    kpiCard("Top Opportunity Owner", top ? top[0] : "—", null, "text-blue-600", top ? money(top) : "");
 }
 
 /* ─────────── Charts ─────────── */
@@ -247,95 +247,66 @@ const yMoney = { ticks: { callback: v => money(v) } };
 function renderCharts(rows) {
   const C = CONFIG.COLS;
   const monthly = groupMonthly(rows);
-  makeChart("lineChart", { type: "line", data: {
+  makeChart("lineChart", {
+    type: "line",
+    data: {
       labels: monthly.map(m => monthKey(m.date)),
-      datasets: [{ data: monthly.map(m => m.revenue), borderColor: "#2563eb",
-        backgroundColor: "rgba(37,99,235,.12)", fill: true, tension: .35, pointRadius: 3 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: yMoney } } });
+      datasets: [{ data: monthly.map(m => m.revenue), borderColor: "#2563eb", backgroundColor: "rgba(37,99,235,.12)", fill: true, tension: .35, pointRadius: 4 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: yMoney } }
+  });
 
   const byMgr = new Map();
   rows.forEach(r => { if (r[C.manager]) byMgr.set(r[C.manager], (byMgr.get(r[C.manager]) || 0) + r._revenue); });
-  const mgrs = [...byMgr.entries()].sort((a, b) => b[1] - a[1]);
-  makeChart("barChart", { type: "bar", data: {
+  const mgrs = [...byMgr.entries()].sort((a, b) => b - a);
+  makeChart("barChart", {
+    type: "bar",
+    data: {
       labels: mgrs.map(e => e[0]),
-      datasets: [{ data: mgrs.map(e => e[1]), backgroundColor: "#2563eb", borderRadius: 4 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: yMoney } } });
+      datasets: [{ data: mgrs.map(e => e), backgroundColor: "#2563eb", borderRadius: 4 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: yMoney } }
+  });
 
-  const per = new Map();   // distinct accounts per status
+  const per = new Map();
   rows.forEach(r => {
     const s = String(r[C.status] || "Unknown").trim() || "Unknown";
     if (!r[C.account]) return;
     if (!per.has(s)) per.set(s, new Set());
     per.get(s).add(r[C.account]);
   });
-  makeChart("donutChart", { type: "doughnut", data: {
+  makeChart("donutChart", {
+    type: "doughnut",
+    data: {
       labels: [...per.keys()],
-      datasets: [{ data: [...per.values()].map(s => s.size),
-        backgroundColor: ["#2563eb", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#64748b"] }] },
-    options: { responsive: true, maintainAspectRatio: false, cutout: "60%", plugins: { legend: { position: "right" } } } });
+      datasets: [{ data: [...per.values()].map(s => s.size), backgroundColor: ["#2563eb", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#64748b"] }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, cutout: "60%", plugins: { legend: { position: "right" } } }
+  });
 
   const acc = new Map();
   rows.forEach(r => { if (r[C.account]) acc.set(r[C.account], (acc.get(r[C.account]) || 0) + r._revenue); });
-  const top10 = [...acc.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10);
-  makeChart("topChart", { type: "bar", data: {
+  const top10 = [...acc.entries()].sort((a, b) => b - a).slice(0, 10);
+  makeChart("topChart", {
+    type: "bar",
+    data: {
       labels: top10.map(e => e[0]),
-      datasets: [{ data: top10.map(e => e[1]), backgroundColor: "#10b981", borderRadius: 4 }] },
-    options: { indexAxis: "y", responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } }, scales: { x: yMoney } } });
+      datasets: [{ data: top10.map(e => e), backgroundColor: "#10b981", borderRadius: 4 }]
+    },
+    options: { indexAxis: "y", responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: yMoney } }
+  });
 }
 
-/* ─────────── Table (sortable + searchable) ─────────── */
+/* ─────────── Table ─────────── */
 let sortState = { key: null, dir: 1 };
 function sortBy(col) {
   sortState = { key: col, dir: sortState.key === col ? -sortState.dir : 1 };
   renderTable();
 }
+
 function renderTable(rows) {
   const C = CONFIG.COLS;
   const q = document.getElementById("search").value.toLowerCase();
   let list = (rows ?? getFiltered()).filter(r =>
     !q || Object.values(C).some(h => String(r[h] ?? "").toLowerCase().includes(q)));
-  if (sortState.key) {
-    const k = sortState.key;
-    list = [...list].sort((a, b) => {
-      let va = k === C.revenue ? a._revenue : k === C.date ? a._date : a[k];
-      let vb = k === C.revenue ? b._revenue : k === C.date ? b._date : b[k];
-      const cmp = va instanceof Date ? va - vb : typeof va === "number" ? va - vb : String(va).localeCompare(String(vb));
-      return cmp * sortState.dir;
-    });
-  }
-  tableRows = list;
-  const cols = Object.values(C);
-  document.getElementById("tableHead").innerHTML = `<tr>${cols.map(h =>
-    `<th onclick="sortBy('${h}')" class="cursor-pointer px-4 py-3 font-medium hover:bg-gray-100">${h}${sortState.key === h ? (sortState.dir === 1 ? " ▲" : " ▼") : ""}</th>`).join("")}</tr>`;
-  document.getElementById("tableBody").innerHTML = list.slice(0, 100).map(r =>
-    `<tr class="border-t hover:bg-gray-50">${cols.map(h => `<td class="px-4 py-2">${r[h] ?? ""}</td>`).join("")}</tr>`).join("");
-  document.getElementById("tableFoot").textContent = `Showing ${Math.min(list.length, 100)} of ${list.length} rows (click a header to sort)`;
-}
-function onSearch() { renderTable(); }
-
-/* ─────────── CSV Export ─────────── */
-function exportCSV() {
-  const cols = Object.values(CONFIG.COLS);
-  const esc = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
-  const csv = [cols.join(","), ...tableRows.map(r => cols.map(h => esc(r[h])).join(","))].join("\n");
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
-  a.download = "dashboard-export.csv";
-  a.click();
-}
-
-/* ─────────── Master render ─────────── */
-function render() {
-  const rows = getFiltered();
-  renderKpis(rows);
-  renderCharts(rows);
-  renderTable(rows);
-}
-
-/* ─────────── Start ─────────── */
-loadData();
-setInterval(loadData, CONFIG.REFRESH_MINUTES * 60 * 1000);
-</script>
-</body>
-</html>
+  if (sortState.key
