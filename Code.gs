@@ -1,11 +1,12 @@
 const ROOT_FOLDER_ID = "1dFDQTPnkso7as9j1rszvb0YI2_6Nu10g";
+const CACHE_KEY = "AM_DASHBOARD_DATA";
+const CACHE_DURATION = 3600; // 1 hour in seconds
 
 /*
 ========================================================
 WEB APP
 ========================================================
 */
-
 function doGet() {
   return HtmlService
     .createTemplateFromFile("index")
@@ -16,11 +17,25 @@ function doGet() {
 
 /*
 ========================================================
-MAIN DATA FUNCTION
+MAIN DATA FUNCTION (With Caching)
 ========================================================
 */
+function getDashboardData(forceRefresh = false) {
+  const cache = CacheService.getScriptCache();
+  
+  // 1. Check Cache first (unless forced refresh)
+  if (!forceRefresh) {
+    const cachedData = cache.get(CACHE_KEY);
+    if (cachedData) {
+      try {
+        return JSON.parse(cachedData);
+      } catch (e) {
+        console.warn("Failed to parse cached data, fetching fresh.");
+      }
+    }
+  }
 
-function getDashboardData() {
+  // 2. Fetch fresh data
   const root = DriveApp.getFolderById(ROOT_FOLDER_ID);
   const result = [];
   const folders = root.getFolders();
@@ -32,40 +47,27 @@ function getDashboardData() {
 
     while (files.hasNext()) {
       const file = files.next();
-
       try {
         const spreadsheet = SpreadsheetApp.openById(file.getId());
         const sheets = spreadsheet.getSheets();
 
         sheets.forEach(sheet => {
           const values = sheet.getDataRange().getValues();
-
-          if (!values || values.length < 2) {
-            return;
-          }
+          if (!values || values.length < 2) return;
 
           const headers = values[0].map(h => String(h).trim());
           const headerMap = createHeaderMap(headers);
 
-          if (
-            headerMap["opportunity name"] === undefined &&
-            headerMap["account name"] === undefined
-          ) {
+          // Skip if it doesn't look like an opportunity sheet
+          if (headerMap["opportunity name"] === undefined && headerMap["account name"] === undefined) {
             return;
           }
 
           for (let i = 1; i < values.length; i++) {
             const row = values[i];
-
-            if (
-              row.every(value =>
-                value === "" ||
-                value === null ||
-                value === undefined
-              )
-            ) {
-              continue;
-            }
+            
+            // Skip completely empty rows
+            if (row.every(val => val === "" || val === null || val === undefined)) continue;
 
             result.push({
               am: getValue(row, headerMap, "opportunity owner") || amName,
@@ -79,104 +81,71 @@ function getDashboardData() {
               quantity: parseNumber(getValue(row, headerMap, "opportunity quantity")),
               nextStep: getValue(row, headerMap, "next step"),
               modified: formatDate(getValue(row, headerMap, "last modified date")),
-              modifiedBy: getValue(row, headerMap, "last modified by"),
-              sourceFile: file.getName(),
-              sourceSheet: sheet.getName()
+              sourceFile: file.getName()
             });
           }
         });
       } catch (error) {
-        console.error("Could not read " + file.getName() + ": " + error);
+        console.error(`Error reading ${file.getName()}: ${error.message}`);
       }
     }
   }
 
-  return {
+  const payload = {
     generatedAt: new Date().toISOString(),
+    isCached: false,
     rows: result
   };
+
+  // 3. Attempt to save to cache (Script cache limit is 100KB per item)
+  try {
+    const jsonString = JSON.stringify(payload);
+    if (jsonString.length < 100000) { // Google Apps Script cache size limit safeguard
+      cache.put(CACHE_KEY, jsonString, CACHE_DURATION);
+    }
+  } catch (e) {
+    console.warn("Payload too large to cache, bypassing cache storage.");
+  }
+
+  return payload;
 }
 
-/*
-========================================================
-HEADER MAP
-========================================================
-*/
-
+/* ========================================================
+   HELPERS
+======================================================== */
 function createHeaderMap(headers) {
   const map = {};
   headers.forEach((header, index) => {
-    const normalized = String(header).toLowerCase().trim();
-    map[normalized] = index;
+    map[String(header).toLowerCase().trim()] = index;
   });
   return map;
 }
 
-/*
-========================================================
-GET VALUE
-========================================================
-*/
-
 function getValue(row, map, column) {
   const index = map[column];
-  if (index === undefined) {
-    return "";
-  }
-  return row[index];
+  return index !== undefined ? row[index] : "";
 }
 
-/*
-========================================================
-NUMBER PARSING
-========================================================
-*/
-
 function parseNumber(value) {
-  if (value === null || value === undefined || value === "") {
-    return 0;
-  }
-
-  if (typeof value === "number") {
-    return value;
-  }
-
+  if (value == null || value === "") return 0;
+  if (typeof value === "number") return value;
+  
   let str = String(value).trim();
   const isNegative = /^\(.*\)$/.test(str) || str.startsWith("-");
   const cleaned = str.replace(/[$₹€£,\s()]/g, "").replace(/[^\d.]/g, "");
   const number = parseFloat(cleaned);
-
-  if (isNaN(number)) return 0;
-  return isNegative ? -Math.abs(number) : number;
+  
+  return isNaN(number) ? 0 : (isNegative ? -Math.abs(number) : number);
 }
 
-/*
-========================================================
-DATE FORMATTING
-========================================================
-*/
-
 function formatDate(value) {
-  if (!value) {
-    return "";
-  }
-
+  if (!value) return "";
   if (Object.prototype.toString.call(value) === "[object Date]") {
-    return Utilities.formatDate(
-      value,
-      Session.getScriptTimeZone(),
-      "yyyy-MM-dd"
-    );
+    return Utilities.formatDate(value, Session.getScriptTimeZone(), "yyyy-MM-dd");
   }
-
   const parsedDate = new Date(value);
   if (!isNaN(parsedDate.getTime())) {
-    return Utilities.formatDate(
-      parsedDate,
-      Session.getScriptTimeZone(),
-      "yyyy-MM-dd"
-    );
+    return Utilities.formatDate(parsedDate, Session.getScriptTimeZone(), "yyyy-MM-dd");
   }
-
   return String(value);
 }
